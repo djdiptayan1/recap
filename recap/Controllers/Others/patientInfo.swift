@@ -1,4 +1,6 @@
+import FirebaseAuth
 import UIKit
+import FirebaseFirestore
 
 class patientInfo: UIViewController {
     weak var delegate: PatientInfoDelegate?
@@ -198,7 +200,6 @@ class patientInfo: UIViewController {
     }
 
     @objc private func saveButtonTapped() {
-        // Validate inputs
         guard let firstName = firstNameField.text, !firstName.isEmpty,
               let lastName = lastNameField.text, !lastName.isEmpty,
               let dob = dobField.text, !dob.isEmpty,
@@ -216,50 +217,37 @@ class patientInfo: UIViewController {
         loadingIndicator.startAnimating()
         saveButton.isEnabled = false
 
-        let userDetails: [String: Any] = [
+        guard let userId = Auth.auth().currentUser?.uid else {
+            showAlert(message: "User not logged in.")
+            return
+        }
+
+        let updatedData: [String: Any] = [
             "firstName": firstName,
             "lastName": lastName,
             "dateOfBirth": dob,
             "sex": sex,
             "bloodGroup": bloodGroup,
-            "stage": stage,
-            "hasCompletedProfile": true,
+            "stage": stage
         ]
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
-            guard let self = self else { return }
-            self.storage.saveProfile(
-                details: userDetails,
-                image: self.profileImageView.image
-            ) { success in
-                DispatchQueue.main.async {
-                    loadingIndicator.removeFromSuperview()
+        let db = Firestore.firestore()
 
-                    if success {
-//                        self.delegate?.didCompleteProfile()
-//                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-//                            self.dismiss(animated: true)
-//                        }
+        // Update existing document with new details
+        db.collection("users").document(userId).updateData(updatedData) { [weak self] error in
+            DispatchQueue.main.async {
+                loadingIndicator.removeFromSuperview()
+                self?.saveButton.isEnabled = true
 
-                        // Navigate to TabbarViewController
-                        // Create the TabbarViewController
-                        let tabBarVC = TabbarViewController()
-                        guard let window = UIApplication.shared.windows.first else { return }
-                        tabBarVC.view.frame = CGRect(x: 0, y: window.frame.height, width: window.frame.width, height: window.frame.height)
-                        window.addSubview(tabBarVC.view)
-
-                        UIView.animate(withDuration: 0.5, animations: {
-                            self.view.frame = CGRect(x: 0, y: window.frame.height, width: window.frame.width, height: window.frame.height)
-
-                            tabBarVC.view.frame = window.bounds
-                        }) { _ in
-                            window.rootViewController = tabBarVC
-                            window.makeKeyAndVisible()
-                        }
-                    } else {
-                        self.showAlert(message: "Failed to save profile")
-                        self.saveButton.isEnabled = true
-                    }
+                if let error = error {
+                    print("Error updating profile: \(error.localizedDescription)")
+                    self?.showAlert(message: "Failed to save profile. Please try again.")
+                } else {
+                    print("Profile updated successfully")
+                    let tabBarVC = TabbarViewController()
+                    guard let window = UIApplication.shared.windows.first else { return }
+                    window.rootViewController = tabBarVC
+                    window.makeKeyAndVisible()
                 }
             }
         }

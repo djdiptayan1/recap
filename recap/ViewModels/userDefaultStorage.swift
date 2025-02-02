@@ -19,6 +19,7 @@ protocol ProfileStorageProtocol {
 
 protocol FamilyStorageProtocol {
     func saveFamilyMember(_ member: FamilyMember, image: UIImage?, completion: @escaping (Bool) -> Void)
+    func saveFamilyMembers(_ members: [FamilyMember])
     func getFamilyMembers() -> [FamilyMember]
     func getFamilyMemberImage(for id: UUID) -> UIImage?
     func clearFamilyData()
@@ -90,25 +91,19 @@ class UserDefaultsStorageProfile: ProfileStorageProtocol {
 class UserDefaultsStorageFamilyMember: FamilyStorageProtocol {
     static let shared = UserDefaultsStorageFamilyMember()
     private init() {}
-//    private let defaults = UserDefaults.standard
 
     private enum Keys {
         static let familyMembers = "familyMembers"
         static let familyImages = "familyImages"
     }
 
-    // MARK: - Family Members Storage
-
+    // Existing save method for a single member
     func saveFamilyMember(_ member: FamilyMember, image: UIImage?, completion: @escaping (Bool) -> Void) {
         var familyMembers = getFamilyMembers()
         familyMembers.append(member)
 
-        // Save member data
-        if let encoded = try? JSONEncoder().encode(familyMembers) {
-            defaults.set(encoded, forKey: Keys.familyMembers)
-        }
+        saveFamilyMembers(familyMembers)
 
-        // Save image if provided
         if let image = image,
            let imageData = image.jpegData(compressionQuality: 0.8) {
             var imageDict = defaults.dictionary(forKey: Keys.familyImages) as? [String: Data] ?? [:]
@@ -116,8 +111,14 @@ class UserDefaultsStorageFamilyMember: FamilyStorageProtocol {
             defaults.set(imageDict, forKey: Keys.familyImages)
         }
 
-        defaults.synchronize()
         completion(true)
+    }
+
+    // New method to save multiple members
+    func saveFamilyMembers(_ members: [FamilyMember]) {
+        if let encoded = try? JSONEncoder().encode(members) {
+            defaults.set(encoded, forKey: Keys.familyMembers)
+        }
     }
 
     func getFamilyMembers() -> [FamilyMember] {

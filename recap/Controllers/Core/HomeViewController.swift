@@ -12,7 +12,7 @@ class HomeViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .systemBackground
+        applyGradientBackground()
         setupNavigationBar()
         setupDelegates()
         setupLayout()
@@ -187,10 +187,10 @@ extension HomeViewController: UICollectionViewDelegate, UICollectionViewDataSour
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         DispatchQueue.main.asyncAfter(deadline: .now()) {
             if indexPath.item == 0 {
-                let questionsVC = QuestionsViewController()
+                let questionsVC = DailyQuestionDetailViewController()
                 self.navigationController?.pushViewController(questionsVC, animated: true)
             } else {
-                let streaksVC = streaksViewController()
+                let streaksVC = StreaksViewController()
                 self.navigationController?.pushViewController(streaksVC, animated: true)
             }
         }
@@ -227,6 +227,18 @@ extension HomeViewController: UITableViewDelegate, UITableViewDataSource {
     }
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 160
+    }
+    
+    private func applyGradientBackground() {
+        let gradientLayer = CAGradientLayer()
+        gradientLayer.colors = [
+            UIColor(red: 0.69, green: 0.88, blue: 0.88, alpha: 1.0).cgColor,
+            UIColor(red: 0.94, green: 0.74, blue: 0.80, alpha: 1.0).cgColor
+        ]
+        gradientLayer.startPoint = CGPoint(x: 0, y: 0)
+        gradientLayer.endPoint = CGPoint(x: 1, y: 1)
+        gradientLayer.frame = view.bounds
+        view.layer.insertSublayer(gradientLayer, at: 0)
     }
 }
 #Preview()

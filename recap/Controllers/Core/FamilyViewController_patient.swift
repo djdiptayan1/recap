@@ -1,3 +1,4 @@
+
 //
 //  FamilyViewController.swift
 //  recap
@@ -5,9 +6,10 @@
 //  Created by Diptayan Jash on 05/11/24.
 //
 
+import FirebaseAuth
 import UIKit
 
-class FamilyViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
+class FamilyViewController_patient: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     private var familyMembers: [FamilyMember] = []
     private var collectionView: UICollectionView!
 
@@ -27,8 +29,14 @@ class FamilyViewController: UIViewController, UICollectionViewDelegate, UICollec
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = "Family"
-        view.backgroundColor = .systemBackground
+
+        // Ensure user is logged in
+        guard let currentUser = Auth.auth().currentUser else {
+            print("No logged-in user found. Redirecting to login screen.")
+            // Redirect to login if needed
+            // navigationController?.pushViewController(LoginViewController(), animated: true)
+            return
+        }
 
         setupUI()
         loadFamilyMembers()
@@ -36,9 +44,31 @@ class FamilyViewController: UIViewController, UICollectionViewDelegate, UICollec
     }
 
     private func loadFamilyMembers() {
+        // Load cached family members from local storage
         familyMembers = dataProtocol.getFamilyMembers()
+
         DispatchQueue.main.async { [weak self] in
             self?.collectionView.reloadData()
+        }
+
+        // Fetch updated family members from Firestore
+        guard let patientId = Auth.auth().currentUser?.uid else {
+            print("Patient not logged in.")
+            return
+        }
+
+        FirebaseManager.shared.fetchFamilyMembers(for: patientId) { [weak self] members, error in
+            guard let self = self else { return }
+
+            if let error = error {
+                print("Error fetching family members: \(error.localizedDescription)")
+            } else if let members = members {
+                self.familyMembers = members
+                self.dataProtocol.saveFamilyMembers(members) // Bulk save family members
+                DispatchQueue.main.async {
+                    self.collectionView.reloadData()
+                }
+            }
         }
     }
 
@@ -86,6 +116,7 @@ class FamilyViewController: UIViewController, UICollectionViewDelegate, UICollec
     }
 
     @objc private func handleFamilyMemberAdded() {
+        print("Handling family member added...")
         loadFamilyMembers()
     }
 
@@ -174,7 +205,55 @@ class FamilyViewController: UIViewController, UICollectionViewDelegate, UICollec
         }
         let member = familyMembers[indexPath.row]
         cell.configure(with: member)
+        // Add long press gesture to delete
+        let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPressToDelete(_:)))
+        cell.addGestureRecognizer(longPressGesture)
+
         return cell
+    }
+
+    @objc private func handleLongPressToDelete(_ gesture: UILongPressGestureRecognizer) {
+        guard gesture.state == .began,
+              let cell = gesture.view as? UICollectionViewCell,
+              let indexPath = collectionView.indexPath(for: cell) else {
+            return
+        }
+
+        let memberToDelete = familyMembers[indexPath.row]
+
+        // Show confirmation alert
+        let alert = UIAlertController(title: "Delete Family Member", message: "Are you sure you want to delete \(memberToDelete.name)?", preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+        alert.addAction(UIAlertAction(title: "Delete", style: .destructive) { [weak self] _ in
+            self?.deleteFamilyMember(memberToDelete, at: indexPath)
+        })
+        present(alert, animated: true)
+    }
+
+    private func deleteFamilyMember(_ member: FamilyMember, at indexPath: IndexPath) {
+        guard let patientId = Auth.auth().currentUser?.uid else {
+            print("Error: Patient not logged in.")
+            return
+        }
+
+        // Delete from Firebase
+        FirebaseManager.shared.deleteFamilyMember(for: patientId, memberId: member.id.uuidString) { [weak self] error in
+            if let error = error {
+                print("Failed to delete family member from Firebase: \(error.localizedDescription)")
+                self?.showAlert(title: "Error", message: "Failed to delete family member.")
+                return
+            }
+
+            // Remove local image if exists
+            if !member.imageURL.isEmpty {
+                try? FileManager.default.removeItem(atPath: member.imageURL)
+            }
+
+            // Remove from local storage and update UI
+            self?.familyMembers.remove(at: indexPath.row)
+            self?.dataProtocol.saveFamilyMembers(self?.familyMembers ?? [])
+            self?.collectionView.deleteItems(at: [indexPath])
+        }
     }
 
     override func viewWillAppear(_ animated: Bool) {

@@ -9,10 +9,22 @@ import Foundation
 
 protocol DataUploadProtocol {
     func saveUserDetails(_ details: UserDetails, completion: @escaping (Error?) -> Void)
+    func addFamilyMember(for patientId: String, member: FamilyMember, completion: @escaping (Error?) -> Void)
 }
 
-class DataUpload: DataUploadProtocol {
+class DataUploadManager: DataUploadProtocol {
+    
+    // Saving user details (unchanged)
     func saveUserDetails(_ details: UserDetails, completion: @escaping (Error?) -> Void) {
-        // Fire base Manager
+        FirebaseManager.shared.saveUserDetails(details) { error in
+            completion(error)
+        }
+    }
+
+    // Add family member using Firebase
+    func addFamilyMember(for patientId: String, member: FamilyMember, completion: @escaping (Error?) -> Void) {
+        FirebaseManager.shared.addFamilyMember(for: patientId, member: member) { error in
+            completion(error)
+        }
     }
 }

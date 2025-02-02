@@ -5,8 +5,8 @@
 //  Created by Diptayan Jash on 05/11/24.
 //
 
-import UIKit
 import SDWebImage
+import UIKit
 
 class FamilyMemberCell: UICollectionViewCell {
     static let identifier = "FamilyMemberCell"
@@ -99,21 +99,19 @@ class FamilyMemberCell: UICollectionViewCell {
     }
 
 //    func configure(with familyMember: FamilyMember) {
-////        imageView.image = UIImage(named: familyMember.imageName)
+    ////        imageView.image = UIImage(named: familyMember.imageName)
 //        imageView.sd_setImage(with: URL(string: familyMember.imageURL), placeholderImage: UIImage(named: "placeholder"))
 //        nameLabel.text = familyMember.name
 //        relationshipLabel.text = familyMember.relationship
 //        phoneLabel.text = familyMember.phone
 //    }
-    
+
     func configure(with familyMember: FamilyMember) {
         nameLabel.text = familyMember.name
         relationshipLabel.text = familyMember.relationship
         phoneLabel.text = familyMember.phone
-        
-        if let savedImage = UserDefaultsStorageFamilyMember.shared.getFamilyMemberImage(
-            for: familyMember.id
-        ) {
+
+        if let savedImage = UIImage(contentsOfFile: familyMember.imageURL), !familyMember.imageURL.isEmpty {
             imageView.image = savedImage
         } else {
             imageView.image = UIImage(systemName: "person.circle.fill")
@@ -121,6 +119,6 @@ class FamilyMemberCell: UICollectionViewCell {
     }
 }
 
-#Preview(){
+#Preview() {
     FamilyMemberCell()
 }

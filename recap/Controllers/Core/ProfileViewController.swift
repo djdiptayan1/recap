@@ -7,41 +7,19 @@
 import Foundation
 import SDWebImage
 import UIKit
+import FirebaseAuth
 
 class ProfileViewController: UIViewController {
     private var userDetails: [String: Any]?
-
-    private let dataProtocol: ProfileStorageProtocol
-
-    init(storage: ProfileStorageProtocol = UserDefaultsStorageProfile.shared) {
-        dataProtocol = storage
-        super.init(nibName: nil, bundle: nil)
-    }
-
-    required init?(coder: NSCoder) {
-        dataProtocol = UserDefaultsStorageProfile.shared
-        super.init(coder: coder)
-    }
+    private let dataFetchManager: DataFetchProtocol = DataFetch()
 
     private let profileImageView: UIImageView = {
         let imageView = UIImageView()
-        imageView.sd_setImage(
-            with: URL(string: "https://portfoliodata.djdiptayan.in/profile_pics/dj.png"),
-            placeholderImage: UIImage(named: "person.circle"),
-            options: [.retryFailed, .highPriority],
-            completed: { _, error, _, _ in
-                if error != nil {
-                    imageView.image = UIImage(named: "person.circle")
-                }
-            }
-        )
+        imageView.image = UIImage(named: "person.circle")
         imageView.contentMode = .scaleAspectFill
         imageView.layer.cornerRadius = 10
         imageView.clipsToBounds = true
-        imageView.widthAnchor.constraint(equalToConstant: 95).isActive = true
-        imageView.heightAnchor.constraint(equalToConstant: 95).isActive = true
         imageView.translatesAutoresizingMaskIntoConstraints = false
-
         return imageView
     }()
 
@@ -62,40 +40,69 @@ class ProfileViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        loadUserProfile()
         view.backgroundColor = .systemBackground
         setupNavigationBar()
         setupUI()
         setupTableView()
-
+        loadUserProfile()
         prefetchQuestions()
     }
 
     private func loadUserProfile() {
-        if let savedProfile = dataProtocol.getProfile() {
-            // Update UI with saved data
-            nameLabel.text = "\(savedProfile["firstName"] as? String ?? "") \(savedProfile["lastName"] as? String ?? "")"
+        guard let userId = Auth.auth().currentUser?.uid else {
+            print("User not logged in.")
+            return
+        }
 
-            // Load profile image
-            if let profileImage = dataProtocol.getProfileImage() {
-                profileImageView.image = profileImage
+        dataFetchManager.fetchUserProfile(userId: userId) { [weak self] userProfile, error in
+            guard let self = self else { return }
+
+            if let error = error {
+                print("Error loading profile: \(error.localizedDescription)")
+                self.showAlert(message: "Failed to load profile.")
+                return
             }
 
-            tableView.reloadData()
+            if let profile = userProfile {
+                print("Profile fetched: \(profile)")
+
+                // Save the profile locally
+                UserDefaultsStorageProfile.shared.saveProfile(details: profile, image: nil) { success in
+                    if success {
+                        self.updateUI(with: profile)
+                    } else {
+                        print("Failed to save profile locally.")
+                    }
+                }
+            }
+        }
+    }
+
+    private func updateUI(with details: [String: Any]) {
+        nameLabel.text = "\(details["firstName"] as? String ?? "Not Set") \(details["lastName"] as? String ?? "Not Set")"
+
+        if let profileImageURL = details["profileImageURL"] as? String, !profileImageURL.isEmpty,
+           let url = URL(string: profileImageURL) {
+            profileImageView.sd_setImage(with: url, placeholderImage: UIImage(named: "person.circle"))
+        } else {
+            profileImageView.image = UIImage(named: "person.circle")
+        }
+
+        tableView.reloadData()
+    }
+
+    private func prefetchQuestions() {
+        dataFetchManager.fetchRapidQuestions { [weak self] questions, _ in
+            if let questions = questions {
+                self?.prefetchedQuestions = questions
+            }
         }
     }
 
     private func setupNavigationBar() {
         navigationItem.largeTitleDisplayMode = .never
-        let doneButton = UIBarButtonItem(title: "Done", style: .done, target: self, action: #selector(doneButtonTapped)
-        )
+        let doneButton = UIBarButtonItem(title: "Done", style: .done, target: self, action: #selector(doneButtonTapped))
         navigationItem.rightBarButtonItem = doneButton
-
-        if let sheet = sheetPresentationController {
-            sheet.prefersGrabberVisible = true
-            sheet.prefersEdgeAttachedInCompactHeight = true
-            sheet.detents = [.medium(), .large()]
-        }
     }
 
     @objc private func doneButtonTapped() {
@@ -134,14 +141,14 @@ class ProfileViewController: UIViewController {
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
     }
 
-    private func prefetchQuestions() {
-        let dataFetch = DataFetch()
-        dataFetch.fetchRapidQuestions { [weak self] questions, _ in
-            if let questions = questions {
-                self?.prefetchedQuestions = questions
-            }
-        }
-    }
+//    private func prefetchQuestions() {
+//        let dataFetch = DataFetch()
+//        dataFetch.fetchRapidQuestions { [weak self] questions, _ in
+//            if let questions = questions {
+//                self?.prefetchedQuestions = questions
+//            }
+//        }
+//    }
 }
 
 // MARK: - UITableViewDelegate & DataSource
@@ -153,7 +160,7 @@ extension ProfileViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         switch section {
-        case 0: return 6
+        case 0: return 7
         case 1: return 1
         case 2: return 1
         default: return 0
@@ -174,24 +181,32 @@ extension ProfileViewController: UITableViewDelegate, UITableViewDataSource {
             let titles = [
                 "First Name",
                 "Last Name",
+                "UID",
                 "Date of Birth",
                 "Sex",
                 "Age",
                 "Blood Type",
             ]
-            //            let values = [
-            //                "Diptayan",
-            //                "Jash",
-            //                "31/03/2003",
-            //                "Male",
-            //                "21",ˆ
-            //                "B+"
-            //            ]
+//            let values: [String] = {
+//                if let details = dataProtocol.getProfile() {
+//                    return [
+//                        details["firstName"] as? String ?? "Not Set",
+//                        details["lastName"] as? String ?? "Not Set",
+//                        details["dateOfBirth"] as? String ?? "Not Set",
+//                        details["sex"] as? String ?? "Not Set",
+//                        details["bloodGroup"] as? String ?? "Not Set",
+//                        details["stage"] as? String ?? "Not Set",
+//                    ]
+//                }
+//                return Array(repeating: "Not Set", count: 6)
+//            }()
+            UserDefaultsStorageProfile.shared.getProfile()
             let values: [String] = {
-                if let details = dataProtocol.getProfile() {
+                if let details = UserDefaultsStorageProfile.shared.getProfile() {
                     return [
                         details["firstName"] as? String ?? "Not Set",
                         details["lastName"] as? String ?? "Not Set",
+                        details["patientUID"] as? String ?? "Not Set",
                         details["dateOfBirth"] as? String ?? "Not Set",
                         details["sex"] as? String ?? "Not Set",
                         details["bloodGroup"] as? String ?? "Not Set",

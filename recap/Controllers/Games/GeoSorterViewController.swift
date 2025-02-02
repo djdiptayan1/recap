@@ -57,18 +57,20 @@ class GeoSorterViewController: UIViewController {
         super.viewDidLoad()
         title = "Word Game"
         view.backgroundColor = .systemBackground
-        setupGradientBackground()
+        applyGradientBackground()
         setupUI()
         populateWords()
     }
     
-    private func setupGradientBackground() {
+    
+    private func applyGradientBackground() {
         let gradientLayer = CAGradientLayer()
         gradientLayer.colors = [
-            UIColor.systemTeal.withAlphaComponent(0.1).cgColor,
-            UIColor.systemBackground.cgColor
+            UIColor(red: 0.69, green: 0.88, blue: 0.88, alpha: 1.0).cgColor,
+            UIColor(red: 0.94, green: 0.74, blue: 0.80, alpha: 1.0).cgColor
         ]
-        gradientLayer.locations = [0.0, 1.0]
+        gradientLayer.startPoint = CGPoint(x: 0, y: 0)
+        gradientLayer.endPoint = CGPoint(x: 1, y: 1)
         gradientLayer.frame = view.bounds
         view.layer.insertSublayer(gradientLayer, at: 0)
     }

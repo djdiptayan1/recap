@@ -12,7 +12,7 @@ class ArticleTableViewCell: UITableViewCell {
 
     private let containerView: UIView = {
         let view = UIView()
-        view.backgroundColor = .systemBackground
+        view.backgroundColor = .white
         view.layer.cornerRadius = 10
         view.layer.shadowColor = UIColor.black.cgColor
         view.layer.shadowOpacity = 0.2
@@ -25,7 +25,7 @@ class ArticleTableViewCell: UITableViewCell {
     private let articleImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFill
-//        imageView.layer.cornerRadius = 10
+        imageView.layer.cornerRadius = 10
         imageView.clipsToBounds = true
         imageView.translatesAutoresizingMaskIntoConstraints = false
         return imageView
@@ -33,7 +33,7 @@ class ArticleTableViewCell: UITableViewCell {
 
     private let titleLabel: UILabel = {
         let label = UILabel()
-        label.font = UIFont.boldSystemFont(ofSize: 18)
+        label.font = UIFont.boldSystemFont(ofSize: 16)
         label.numberOfLines = 0
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -41,24 +41,15 @@ class ArticleTableViewCell: UITableViewCell {
 
     private let subtitleLabel: UILabel = {
         let label = UILabel()
-        label.font = UIFont.systemFont(ofSize: 15)
+        label.font = UIFont.systemFont(ofSize: 14)
         label.textColor = .gray
         label.numberOfLines = 0
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
-    private func applyTopCornerRadius(to view: UIView, radius: CGFloat) {
-        let path = UIBezierPath(roundedRect: view.bounds, byRoundingCorners: [.topLeft, .topRight], cornerRadii: CGSize(width: radius, height: radius))
-        let mask = CAShapeLayer()
-        mask.path = path.cgPath
-        view.layer.mask = mask
-    }
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
-
-        backgroundColor = .clear
-        contentView.backgroundColor = .clear
 
         contentView.addSubview(containerView)
         containerView.addSubview(articleImageView)
@@ -70,11 +61,11 @@ class ArticleTableViewCell: UITableViewCell {
             containerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 10),
             containerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -10),
             containerView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -10),
-
+            
             articleImageView.topAnchor.constraint(equalTo: containerView.topAnchor),
             articleImageView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
             articleImageView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
-            articleImageView.heightAnchor.constraint(equalToConstant: 200),
+            articleImageView.heightAnchor.constraint(equalToConstant: 180),
 
             titleLabel.topAnchor.constraint(equalTo: articleImageView.bottomAnchor, constant: 10),
             titleLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 10),
@@ -83,7 +74,7 @@ class ArticleTableViewCell: UITableViewCell {
             subtitleLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 5),
             subtitleLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 10),
             subtitleLabel.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -10),
-            subtitleLabel.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -10),
+            subtitleLabel.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -10)
         ])
     }
 
@@ -92,11 +83,8 @@ class ArticleTableViewCell: UITableViewCell {
     }
 
     func configure(with article: Article) {
-        articleImageView.image = UIImage(named: article.image)
+        articleImageView.image = article.image
         titleLabel.text = article.title
-        subtitleLabel.text = article.subtitle
+        subtitleLabel.text = String(article.content.prefix(100)) // Convert PrefixSequence to String
     }
-}
-#Preview(){
-    ArticleTableViewCell()
 }

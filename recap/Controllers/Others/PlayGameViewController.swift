@@ -12,9 +12,8 @@ class PlayGameViewController: UIViewController, UICollectionViewDelegate, UIColl
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        applyGradientBackground()
         title = "Games"
-
-        view.backgroundColor = .systemBackground
 
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .vertical
@@ -80,6 +79,18 @@ class PlayGameViewController: UIViewController, UICollectionViewDelegate, UIColl
         let games = gamesDemo[indexPath.row]
         cell.configure(with: games)
         return cell
+    }
+    
+    private func applyGradientBackground() {
+        let gradientLayer = CAGradientLayer()
+        gradientLayer.colors = [
+            UIColor(red: 0.69, green: 0.88, blue: 0.88, alpha: 1.0).cgColor,
+            UIColor(red: 0.94, green: 0.74, blue: 0.80, alpha: 1.0).cgColor
+        ]
+        gradientLayer.startPoint = CGPoint(x: 0, y: 0)
+        gradientLayer.endPoint = CGPoint(x: 1, y: 1)
+        gradientLayer.frame = view.bounds
+        view.layer.insertSublayer(gradientLayer, at: 0)
     }
 }
 #Preview(){

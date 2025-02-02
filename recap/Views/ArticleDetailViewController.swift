@@ -1,21 +1,16 @@
-//
-//  ArticleDetailViewController.swift
-//  Recap
-//
-//  Created by admin70 on 05/11/24.
-//
-
 import UIKit
+import SafariServices
 
 class ArticleDetailViewController: UIViewController {
+    
     private let article: Article
-
+    
     private let scrollView: UIScrollView = {
         let scrollView = UIScrollView()
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         return scrollView
     }()
-
+    
     private let contentStackView: UIStackView = {
         let stackView = UIStackView()
         stackView.axis = .vertical
@@ -23,107 +18,106 @@ class ArticleDetailViewController: UIViewController {
         stackView.translatesAutoresizingMaskIntoConstraints = false
         return stackView
     }()
-
+    
     private let imageView: UIImageView = {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFill
+        imageView.layer.cornerRadius = 12
         imageView.clipsToBounds = true
         imageView.translatesAutoresizingMaskIntoConstraints = false
         return imageView
     }()
-
+    
     private let titleLabel: UILabel = {
         let label = UILabel()
-        label.font = UIFont.boldSystemFont(ofSize: 30)
-        label.textColor = .label
+        label.font = UIFont.boldSystemFont(ofSize: 24)
         label.numberOfLines = 0
-        label.lineBreakMode = .byWordWrapping
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
-
-    private let contentTextView: UITextView = {
-        let textView = UITextView()
-        textView.isEditable = false
-        textView.isScrollEnabled = false
-        textView.textContainerInset = UIEdgeInsets(top: 10, left: 5, bottom: 10, right: 5)
-        textView.font = UIFont.systemFont(ofSize: 20)
-        textView.textColor = .label
-        textView.translatesAutoresizingMaskIntoConstraints = false
-        return textView
+    
+    private let contentLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.systemFont(ofSize: 16)
+        label.numberOfLines = 0
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
     }()
-
+    
+    private let authorLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.italicSystemFont(ofSize: 14)
+        label.textColor = .gray
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
+    private let readMoreButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle("Read More", for: .normal)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.addTarget(self, action: #selector(openLink), for: .touchUpInside)
+        return button
+    }()
+    
     init(article: Article) {
         self.article = article
         super.init(nibName: nil, bundle: nil)
     }
-
+    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        view.backgroundColor = .systemBackground
+        
+        view.backgroundColor = .white
         title = article.title
         setupLayout()
-
-        imageView.image = UIImage(named: article.image)
+        
+        // Set article details
+        imageView.image = article.image
         titleLabel.text = article.title
-        contentTextView.text = article.content
+        contentLabel.text = article.content
+        authorLabel.text = "By \(article.author)"
     }
-
-    @objc private func dismissView() {
-        dismiss(animated: true, completion: nil)
-    }
-
+    
     private func setupLayout() {
+        // Add scroll view to the main view
         view.addSubview(scrollView)
-        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Close", style: .done, target: self, action: #selector(dismissView))
-
-        scrollView.addSubview(imageView)
+        
+        // Add stack view to the scroll view
         scrollView.addSubview(contentStackView)
+        
+        // Add image, title, content, author and button to the stack view
+        contentStackView.addArrangedSubview(imageView)
         contentStackView.addArrangedSubview(titleLabel)
-        contentStackView.addArrangedSubview(contentTextView)
-
+        contentStackView.addArrangedSubview(contentLabel)
+        contentStackView.addArrangedSubview(authorLabel)
+        contentStackView.addArrangedSubview(readMoreButton)
+        
+        // Set up constraints
         NSLayoutConstraint.activate([
-            // ScrollView constraints
             scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            scrollView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
-            scrollView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
+            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             scrollView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
-
-            // ImageView constraints for full width
-            imageView.topAnchor.constraint(equalTo: scrollView.topAnchor),
-            imageView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
-            imageView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
-            imageView.heightAnchor.constraint(equalToConstant: 200),
-
-            // ContentStackView constraints
-            contentStackView.topAnchor.constraint(equalTo: imageView.bottomAnchor, constant: 20),
-            contentStackView.leadingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.leadingAnchor, constant: 20),
-            contentStackView.trailingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.trailingAnchor, constant: -20),
-            contentStackView.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor),
-            contentStackView.widthAnchor.constraint(equalTo: scrollView.widthAnchor, constant: -40)
+            
+            contentStackView.topAnchor.constraint(equalTo: scrollView.topAnchor, constant: 20),
+            contentStackView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor, constant: 20),
+            contentStackView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor, constant: -20),
+            contentStackView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor, constant: -20),
+            contentStackView.widthAnchor.constraint(equalTo: scrollView.widthAnchor, constant: -40),
+            
+            imageView.heightAnchor.constraint(equalToConstant: 200)
         ])
     }
-}
-
-#Preview(){
-    ArticleDetailViewController(article: Article(image: "article", title: "Caregiver Stress", subtitle: "The demands of caregiving can be exhausting and overwhelming ...", content: """
-        Being a caregiver for a loved one with a chronic illness or condition like Alzheimer's can be incredibly rewarding but also mentally and physically demanding. Caregivers often face overwhelming stress due to the constant emotional and physical demands placed upon them.
-
-        It's important to recognize the signs of caregiver stress, such as:
-        - **Physical Exhaustion:** Constant caregiving without adequate rest can lead to burnout and health problems.
-        - **Emotional Strain:** Feelings of frustration, sadness, or guilt are common among caregivers.
-        - **Isolation:** Caregivers often neglect their own social needs due to time constraints.
-
-        To manage stress, caregivers should focus on self-care strategies like:
-        - **Taking Breaks:** It's essential to schedule regular time off, even if it’s just for a short walk or a moment of relaxation.
-        - **Seeking Support:** Whether it’s from family, friends, or professional support groups, talking to others can reduce the feeling of isolation.
-        - **Setting Realistic Expectations:** Acknowledge that it's okay to ask for help and not do everything alone.
-
-        Recognizing caregiver stress early and taking steps to reduce it is key to ensuring that both the caregiver and the person they care for can thrive.
-    """))
+    
+    @objc private func openLink() {
+        if let url = URL(string: article.link) {
+            let safariVC = SFSafariViewController(url: url)
+            present(safariVC, animated: true, completion: nil)
+        }
+    }
 }

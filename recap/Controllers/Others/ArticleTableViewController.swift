@@ -1,74 +1,65 @@
-//
-//  ArticleTableViewController.swift
-//  Recap
-//
-//  Created by admin70 on 05/11/24.
-//
-
 import UIKit
+import FirebaseFirestore
 
 class ArticleTableViewController: UITableViewController {
-    private var articles = sampleArticles
-    
-    private let headerView: UIView = {
-        let view = UIView()
-        view.backgroundColor = .clear
-        return view
-    }()
+    var db: Firestore!
+    var articles = [Article]()  // This is the array to store fetched articles
+
     override func viewDidLoad() {
         super.viewDidLoad()
+
+        // Initialize Firestore
+        db = Firestore.firestore()
+        
+        // Fetch articles from Firestore
+        fetchArticles()
+
+        // Set up the view
+ 
         title = "Articles"
-        navigationController?.navigationBar.prefersLargeTitles = true
-
+        
         tableView.register(ArticleTableViewCell.self, forCellReuseIdentifier: ArticleTableViewCell.identifier)
-        
-        setupTableView()
-    }
-
-    private func setupTableView() {
-        tableView.backgroundColor = .clear
         tableView.separatorStyle = .none
-        tableView.tableHeaderView = headerView
-        tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 20, right: 0)
-        
         tableView.rowHeight = UITableView.automaticDimension
-        tableView.estimatedRowHeight = 400
+        tableView.estimatedRowHeight = 317
     }
 
-    
-    override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
-        view.applyGradientBackground()
+    // Fetch articles from Firestore
+    func fetchArticles() {
+        let articleFetcher = ArticleFetcher()
+        articleFetcher.fetchArticles { [weak self] fetchedArticles, error in
+            if let error = error {
+                print("Failed to fetch articles: \(error.localizedDescription)")
+                return
+            }
+            
+            if let fetchedArticles = fetchedArticles {
+                self?.articles = fetchedArticles
+                DispatchQueue.main.async {
+                    self?.tableView.reloadData()  // Reload table view after fetching
+                }
+            }
+        }
     }
 
     // MARK: - Table view data source
-
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return articles.count
+        return articles.count  // Return the count of articles
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: ArticleTableViewCell.identifier, for: indexPath) as? ArticleTableViewCell else {
             return UITableViewCell()
         }
-        cell.configure(with: articles[indexPath.row])
+        cell.configure(with: articles[indexPath.row])  // Pass the article data to the cell
         cell.selectionStyle = .none
         return cell
     }
 
-//    override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-//        return 260
-//    }
-
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let article = articles[indexPath.row]
         let detailVC = ArticleDetailViewController(article: article)
-        let navController = UINavigationController(rootViewController: detailVC)
-//        navigationController?.pushViewController(detailVC, animated: true)
-        present(navController, animated: true, completion: nil)
+        navigationController?.pushViewController(detailVC, animated: true)
+        tableView.backgroundColor = .clear
     }
-}
-
-#Preview(){
-    ArticleTableViewController()
 }

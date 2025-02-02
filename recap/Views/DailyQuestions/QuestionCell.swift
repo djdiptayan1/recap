@@ -1,10 +1,3 @@
-//
-//  QuestionCell.swift
-//  recap
-//
-//  Created by Diptayan Jash on 09/11/24.
-//
-
 import UIKit
 
 class QuestionCell: UITableViewCell {
@@ -31,7 +24,7 @@ class QuestionCell: UITableViewCell {
     private let iconImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.image = UIImage(systemName: "questionmark.circle.fill")
-        imageView.tintColor = .systemOrange
+        imageView.tintColor = .systemGreen
         imageView.contentMode = .scaleAspectFit
         return imageView
     }()
@@ -87,7 +80,7 @@ class QuestionCell: UITableViewCell {
         descriptionLabel.translatesAutoresizingMaskIntoConstraints = false
         chevronImageView.translatesAutoresizingMaskIntoConstraints = false
         
-//    MARK: - Constraints
+        // MARK: - Constraints
         NSLayoutConstraint.activate([
             containerView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
             containerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
@@ -101,8 +94,8 @@ class QuestionCell: UITableViewCell {
             
             iconImageView.centerXAnchor.constraint(equalTo: iconContainer.centerXAnchor),
             iconImageView.centerYAnchor.constraint(equalTo: iconContainer.centerYAnchor),
-            iconImageView.widthAnchor.constraint(equalToConstant: 24),
-            iconImageView.heightAnchor.constraint(equalToConstant: 24),
+            iconImageView.widthAnchor.constraint(equalToConstant: 25),
+            iconImageView.heightAnchor.constraint(equalToConstant: 25),
             
             titleLabel.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 16),
             titleLabel.leadingAnchor.constraint(equalTo: iconContainer.trailingAnchor, constant: 16),
@@ -114,7 +107,7 @@ class QuestionCell: UITableViewCell {
             descriptionLabel.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -16),
             
             chevronImageView.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
-            chevronImageView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -16),
+            chevronImageView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -8),
             chevronImageView.widthAnchor.constraint(equalToConstant: 20),
             chevronImageView.heightAnchor.constraint(equalToConstant: 20)
         ])
@@ -122,7 +115,15 @@ class QuestionCell: UITableViewCell {
     
     func configure(with question: Question) {
         titleLabel.text = question.text
-//        descriptionLabel.text = question.description
-        iconImageView.tintColor = question.isAnswered ? .systemGreen : .systemOrange
+        
+        // Set the icon and its color based on whether the question is answered
+        iconImageView.image = UIImage(
+            systemName: question.isAnswered ? "checkmark.circle.fill" : "checkmark.circle"
+        )
+        iconImageView.tintColor = question.isAnswered ? .systemGreen : .systemGray
+        
+        // Display options or image description
+        let optionsText = question.answerOptions.joined(separator: ", ")
+        descriptionLabel.text = optionsText.isEmpty ? "No options provided" : optionsText
     }
 }

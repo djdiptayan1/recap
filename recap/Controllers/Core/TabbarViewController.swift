@@ -7,15 +7,18 @@
 
 import UIKit
 
-class TabbarViewController: UITabBarController , UITabBarControllerDelegate{
+class TabbarViewController: UITabBarController, UITabBarControllerDelegate {
 
     override func viewDidLoad() {
         super.viewDidLoad()
         self.delegate = self
 
-        // Do any additional setup after loading the view.
+        // Set the background color to white
+        view.backgroundColor = .white
+
+        // Setup View Controllers
         let tab1 = HomeViewController()
-        let tab2 = FamilyViewController()
+        let tab2 = FamilyViewController_patient()
         
         tab1.title = "Home"
         tab2.title = "Family"
@@ -34,14 +37,12 @@ class TabbarViewController: UITabBarController , UITabBarControllerDelegate{
         
         tabBar.tintColor = .label
         setViewControllers([nav1, nav2], animated: true)
-        
-        
     }
+    
     func tabBarController(_ tabBarController: UITabBarController, didSelect viewController: UIViewController) {
         let generator = UIImpactFeedbackGenerator(style: .light)
         generator.impactOccurred()
     }
-    
 
     /*
     // MARK: - Navigation
@@ -52,8 +53,8 @@ class TabbarViewController: UITabBarController , UITabBarControllerDelegate{
         // Pass the selected object to the new view controller.
     }
     */
-
 }
-#Preview(){
+
+#Preview() {
     TabbarViewController()
 }
