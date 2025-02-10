@@ -9,6 +9,7 @@ import UIKit
 
 class FamilyLoginViewController: UIViewController {
     var verifiedUserDocID: String?
+    var isRemembered = true
     
     // MARK: - UI Components
     private let logoImageView: UIImageView = {
@@ -82,7 +83,7 @@ class FamilyLoginViewController: UIViewController {
     
     let rememberMeButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("Remember me", for: .normal)
+        button.setTitle(" Remember me", for: .normal)  // Space for better alignment
         button.tintColor = .black
         button.setImage(UIImage(systemName: "checkmark.circle.fill"), for: .normal)  // Default checked
         button.tintColor = .systemBlue
@@ -109,8 +110,25 @@ class FamilyLoginViewController: UIViewController {
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = "Patient Login"
+        title = "Family Login"
+        let isUserLoggedIn = UserDefaults.standard.bool(forKey: "isUserLoggedIn")
+        if isUserLoggedIn {
+            if let savedEmail = UserDefaults.standard.string(forKey: "savedEmail"),
+               let savedPassword = UserDefaults.standard.string(forKey: "savedPassword") {
+                emailField.text = savedEmail
+                passwordField.text = savedPassword
+                
+                // Auto-login
+                loginTapped()
+            }
+        }
         setupUI()
+        let Dismisskeyboard = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+                view.addGestureRecognizer(Dismisskeyboard)
+    }
+    
+    @objc func dismissKeyboard() {
+        view.endEditing(true)
     }
     
     // MARK: - Setup UI
@@ -166,8 +184,8 @@ class FamilyLoginViewController: UIViewController {
             loginButton.heightAnchor.constraint(equalToConstant: 50)
         ])
         
-        // Add targets
-        rememberMeButton.addTarget(self, action: #selector(rememberMeTapped), for: .touchUpInside)
+        // Add targets (Fixed function name)
+        rememberMeButton.addTarget(self, action: #selector(toggleRememberMe), for: .touchUpInside)
         loginButton.addTarget(self, action: #selector(loginTapped), for: .touchUpInside)
         verifyButton.addTarget(self, action: #selector(verifyPatientUID), for: .touchUpInside)
     }
@@ -177,7 +195,12 @@ class FamilyLoginViewController: UIViewController {
         let imageName = passwordField.isSecureTextEntry ? "eye.slash" : "eye"
         sender.setImage(UIImage(systemName: imageName), for: .normal)
     }
-
+    
+    @objc private func toggleRememberMe() {
+        isRemembered.toggle()
+        let imageName = isRemembered ? "checkmark.circle.fill" : "circle"
+        rememberMeButton.setImage(UIImage(systemName: imageName), for: .normal)
+    }
 }
 
-#Preview{FamilyLoginViewController()}
+#Preview { FamilyLoginViewController() }
