@@ -8,7 +8,6 @@
 import UIKit
 
 class PatientsViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
-    // Data passed from ProfileViewController
     var userDetails: [String: Any]?
     var prefetchedQuestions: [rapiMemory]?
 
@@ -43,16 +42,18 @@ class PatientsViewController: UIViewController, UITableViewDelegate, UITableView
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
         title = "Patient"
+        navigationController?.navigationBar.prefersLargeTitles = false
         setupNavigationBar()
         setupUI()
         setupTableView()
         
         // Fetch patient details from UserDefaults
-        if let savedUserData = UserDefaults.standard.object(forKey: "patientDetails") as? [String: Any] {
+        if let savedUserData = UserDefaults.standard.object(forKey: Constants.UserDefaultsKeys.patientDetails) as? [String: Any] {
             userDetails = savedUserData
         }
         
         updateUIWithData()
+        animateContent()
     }
 
     private func updateUIWithData() {
@@ -132,7 +133,7 @@ class PatientsViewController: UIViewController, UITableViewDelegate, UITableView
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = UITableViewCell(style: .value1, reuseIdentifier: "cell")
-        cell.accessoryType = .disclosureIndicator
+        cell.accessoryType = .none
 
         let titles = ["First Name", "Last Name", "Date of Birth", "Sex", "Blood Type"]
         let values = [
@@ -152,6 +153,29 @@ class PatientsViewController: UIViewController, UITableViewDelegate, UITableView
 
         return cell
     }
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        // Prevent cell selection (no highlight or grey out)
+        tableView.deselectRow(at: indexPath, animated: false)
+    }
+    private func animateContent() {
+            let views = [profileImageView, nameLabel, tableView]
+            
+            views.enumerated().forEach { index, view in
+                view.alpha = 0
+                view.transform = CGAffineTransform(translationX: 0, y: 20)
+                
+                UIView.animate(
+                    withDuration: 0.6,
+                    delay: Double(index) * 0.2,
+                    usingSpringWithDamping: 0.8,
+                    initialSpringVelocity: 0.5,
+                    options: .curveEaseOut
+                ) {
+                    view.alpha = 1
+                    view.transform = .identity
+                }
+            }
+        }
 }
 
 #Preview {

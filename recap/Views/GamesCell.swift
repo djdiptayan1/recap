@@ -20,7 +20,7 @@ class GamesCell: UICollectionViewCell {
 
     private let nameLabel: UILabel = {
         let label = UILabel()
-        label.font = .boldSystemFont(ofSize: 18)
+        label.font = .boldSystemFont(ofSize: 20)
         label.textColor = .black
         return label
     }()
@@ -41,7 +41,7 @@ class GamesCell: UICollectionViewCell {
     
     private let descriptionLabel: UILabel = {
         let label = UILabel()
-        label.font = .systemFont(ofSize: 15)
+        label.font = .systemFont(ofSize: 18)
         label.textColor = .gray
         label.numberOfLines = 0
         return label
@@ -50,14 +50,6 @@ class GamesCell: UICollectionViewCell {
     override init(frame: CGRect) {
         super.init(frame: frame)
 
-        // Set cell size
-        contentView.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            contentView.widthAnchor.constraint(equalToConstant: 170),
-            contentView.heightAnchor.constraint(equalToConstant: 226),
-        ])
-
-        // Cell styling
         contentView.layer.cornerRadius = 15
         contentView.layer.shadowColor = UIColor.black.cgColor
         contentView.layer.shadowOpacity = 0.1
@@ -65,23 +57,45 @@ class GamesCell: UICollectionViewCell {
         contentView.layer.shadowRadius = 4
         contentView.backgroundColor = .white
 
-        // Add subviews
+        // Enable Auto Layout
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        nameLabel.translatesAutoresizingMaskIntoConstraints = false
+        accessoryIcon.translatesAutoresizingMaskIntoConstraints = false
+        dividerLine.translatesAutoresizingMaskIntoConstraints = false
+        descriptionLabel.translatesAutoresizingMaskIntoConstraints = false
+
         contentView.addSubview(imageView)
         contentView.addSubview(nameLabel)
         contentView.addSubview(accessoryIcon)
         contentView.addSubview(dividerLine)
         contentView.addSubview(descriptionLabel)
 
-        // Layout the subviews with the specified dimensions
-        imageView.frame = CGRect(x: (contentView.frame.size.width - 90) / 2, y: 10, width: 100, height: 100)
+        NSLayoutConstraint.activate([
+            contentView.heightAnchor.constraint(equalToConstant: 130), // Fixed height
 
-        dividerLine.frame = CGRect(x: 10, y: imageView.frame.maxY + 10, width: contentView.frame.size.width - 20, height: 1)
+            imageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 15),
+            imageView.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
+            imageView.widthAnchor.constraint(equalToConstant: 60),
+            imageView.heightAnchor.constraint(equalToConstant: 60),
 
-        nameLabel.frame = CGRect(x: 10, y: dividerLine.frame.maxY + 8, width: contentView.frame.size.width - 40, height: 20)
+            nameLabel.leadingAnchor.constraint(equalTo: imageView.trailingAnchor, constant: 15),
+            nameLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 20),
+            nameLabel.trailingAnchor.constraint(equalTo: accessoryIcon.leadingAnchor, constant: -10),
 
-        accessoryIcon.frame = CGRect(x: contentView.frame.size.width - 25, y: dividerLine.frame.maxY + 8, width: 15, height: 15)
+            accessoryIcon.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -15),
+            accessoryIcon.centerYAnchor.constraint(equalTo: nameLabel.centerYAnchor),
+            accessoryIcon.widthAnchor.constraint(equalToConstant: 15),
+            accessoryIcon.heightAnchor.constraint(equalToConstant: 15),
 
-        descriptionLabel.frame = CGRect(x: 10, y: nameLabel.frame.maxY + 5, width: contentView.frame.size.width - 20, height: 20)
+            dividerLine.leadingAnchor.constraint(equalTo: nameLabel.leadingAnchor),
+            dividerLine.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -15),
+            dividerLine.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 8),
+            dividerLine.heightAnchor.constraint(equalToConstant: 1),
+
+            descriptionLabel.leadingAnchor.constraint(equalTo: nameLabel.leadingAnchor),
+            descriptionLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -15),
+            descriptionLabel.topAnchor.constraint(equalTo: dividerLine.bottomAnchor, constant: 5)
+        ])
     }
 
     required init?(coder: NSCoder) {

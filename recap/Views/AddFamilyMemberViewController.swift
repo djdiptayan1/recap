@@ -8,6 +8,10 @@ class AddFamilyMemberViewController: UIViewController, UIImagePickerControllerDe
     private let dataUploadManager: DataUploadManager
     private let activityIndicator = UIActivityIndicatorView(style: .large)
 
+    struct ValidationError: Error {
+        let message: String
+    }
+
     init(
         storage: FamilyStorageProtocol = UserDefaultsStorageFamilyMember.shared,
         dataUploadManager: DataUploadManager = DataUploadManager()
@@ -85,6 +89,13 @@ class AddFamilyMemberViewController: UIViewController, UIImagePickerControllerDe
         return textField
     }()
 
+    private func validatePhone(_ phone: String) -> Bool {
+        // Remove any non-numeric characters from the phone number
+        let digitsOnly = phone.components(separatedBy: CharacterSet.decimalDigits.inverted).joined()
+        // Check if the resulting string is exactly 10 digits
+        return digitsOnly.count == 10
+    }
+
     private let emailTextField: UITextField = {
         let textField = UITextField()
         textField.placeholder = "Email Address"
@@ -95,6 +106,13 @@ class AddFamilyMemberViewController: UIViewController, UIImagePickerControllerDe
         return textField
     }()
 
+    private func validateEmail(_ email: String) -> Bool {
+        // Email validation
+        let emailRegex = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}"
+        let emailPredicate = NSPredicate(format: "SELF MATCHES %@", emailRegex)
+        return emailPredicate.evaluate(with: email)
+    }
+
     private let passwordTextField: UITextField = {
         let textField = UITextField()
         textField.placeholder = "Password"
@@ -104,12 +122,74 @@ class AddFamilyMemberViewController: UIViewController, UIImagePickerControllerDe
         return textField
     }()
 
+    private func validatePassword(_ password: String) -> (isValid: Bool, message: String) {
+        // Password validation rules
+        let minLength = 4
+        let hasUppercase = password.range(of: "[A-Z]", options: .regularExpression) != nil
+        let hasLowercase = password.range(of: "[a-z]", options: .regularExpression) != nil
+        let hasSpecialCharacter = password.range(of: "[!@#$%^&*(),.?\":{}|<>]", options: .regularExpression) != nil
+
+        if password.count < minLength {
+            return (false, "Password must be at least \(minLength) characters long")
+        }
+        if !hasUppercase {
+            return (false, "Password must contain at least one uppercase letter")
+        }
+        if !hasLowercase {
+            return (false, "Password must contain at least one lowercase letter")
+        }
+        if !hasSpecialCharacter {
+            return (false, "Password must contain at least one special character")
+        }
+
+        return (true, "")
+    }
+
+    private func validateInputs() throws {
+        guard let name = nameTextField.text, !name.isEmpty else {
+            throw ValidationError(message: "Please enter a name")
+        }
+
+        guard let relationship = relationshipTextField.text, !relationship.isEmpty else {
+            throw ValidationError(message: "Please select a relationship")
+        }
+
+        guard let phone = phoneTextField.text, !phone.isEmpty else {
+            throw ValidationError(message: "Please enter a phone number")
+        }
+
+        if !validatePhone(phone) {
+            throw ValidationError(message: "Phone number must be exactly 10 digits")
+        }
+
+        guard let email = emailTextField.text, !email.isEmpty else {
+            throw ValidationError(message: "Please enter an email address")
+        }
+
+        if !validateEmail(email) {
+            throw ValidationError(message: "Please enter a valid email address")
+        }
+
+        guard let password = passwordTextField.text, !password.isEmpty else {
+            throw ValidationError(message: "Please enter a password")
+        }
+
+        let passwordValidation = validatePassword(password)
+        if !passwordValidation.isValid {
+            throw ValidationError(message: passwordValidation.message)
+        }
+
+        guard profileImageView.image != nil else {
+            throw ValidationError(message: "Please select a profile image")
+        }
+    }
+
     private lazy var addButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Add Family Member", for: .normal)
         button.titleLabel?.font = .systemFont(ofSize: 18, weight: .semibold)
-        button.backgroundColor = UIColor.systemGreen.withAlphaComponent(0.2)
-        button.setTitleColor(.systemGreen, for: .normal)
+        button.backgroundColor = UIColor.systemBlue.withAlphaComponent(0.2)
+        button.setTitleColor(.systemBlue, for: .normal)
         button.layer.cornerRadius = 12
         button.addTarget(self, action: #selector(addButtonTapped), for: .touchUpInside)
         return button
@@ -257,65 +337,79 @@ class AddFamilyMemberViewController: UIViewController, UIImagePickerControllerDe
     }
 
     @objc private func addButtonTapped() {
-        guard let name = nameTextField.text, !name.isEmpty,
-              let relationship = relationshipTextField.text, !relationship.isEmpty,
-              let phone = phoneTextField.text, !phone.isEmpty,
-              let email = emailTextField.text, !email.isEmpty,
-              let password = passwordTextField.text, !password.isEmpty,
-              let image = profileImageView.image else {
-            showAlert(title: "Missing Information", message: "Please fill in all fields and select a photo.")
-            return
-        }
-        guard let patientId = Auth.auth().currentUser?.uid else {
-            showAlert(title: "Error", message: "Patient not logged in.")
-            return
-        }
-        let newMemberId = UUID().uuidString
-        let imagePath = "\(patientId)/FAMILY_IMGS/\(newMemberId).jpg"
-        // Disable button and start animation
-        disableUIForUpload()
-        FirebaseManager.shared.uploadFamilyMemberImage(patientId: patientId, imagePath: imagePath, image: image) { [weak self] imageURL, error in
-            guard let self = self else { return }
-            if let error = error {
-                self.enableUIAfterUpload()
-                self.showAlert(title: "Upload Error", message: "Failed to upload image: \(error.localizedDescription)")
+        do {
+            try validateInputs()
+            
+            // Proceed with adding family member if validation is successful
+            guard let name = nameTextField.text,
+                  let relationship = relationshipTextField.text,
+                  let phone = phoneTextField.text,
+                  let email = emailTextField.text,
+                  let password = passwordTextField.text,
+                  let image = profileImageView.image,
+                  let patientId = Auth.auth().currentUser?.uid else {
                 return
             }
-            guard let imageURL = imageURL else {
-                self.enableUIAfterUpload()
-                self.showAlert(title: "Error", message: "Could not retrieve image URL.")
-                return
-            }
-            let newMember = FamilyMember(
-                id: newMemberId,
-                name: name,
-                relationship: relationship,
-                phone: phone,
-                email: email,
-                password: password,
-                imageName: newMemberId,
-                imageURL: imageURL
-            )
-            self.dataUploadManager.addFamilyMember(for: patientId, member: newMember) { error in
-                DispatchQueue.main.async {
+            
+            // Clean phone number
+            let cleanPhone = phone.components(separatedBy: CharacterSet.decimalDigits.inverted).joined()
+            
+            let newMemberId = UUID().uuidString
+            let imagePath = "\(patientId)/FAMILY_IMGS/\(newMemberId).jpg"
+            
+            disableUIForUpload()
+            
+            FirebaseManager.shared.uploadFamilyMemberImage(patientId: patientId, imagePath: imagePath, image: image) { [weak self] imageURL, error in
+                guard let self = self else { return }
+                
+                if let error = error {
                     self.enableUIAfterUpload()
-                    if let error = error {
-                        self.showAlert(title: "Error", message: "Failed to save family member: \(error.localizedDescription)")
-                    } else {
-                        self.showSuccessAnimation {
-                            self.showAlert(title: "Success", message: "Family member added successfully") {
-                                self.dismiss(animated: true)
+                    self.showAlert(title: "Upload Error", message: "Failed to upload image: \(error.localizedDescription)", retry: true)
+                    return
+                }
+                
+                guard let imageURL = imageURL else {
+                    self.enableUIAfterUpload()
+                    self.showAlert(title: "Error", message: "Could not retrieve image URL.", retry: true)
+                    return
+                }
+                
+                let newMember = FamilyMember(
+                    id: newMemberId,
+                    name: name,
+                    relationship: relationship,
+                    phone: cleanPhone,
+                    email: email.trimmingCharacters(in: .whitespacesAndNewlines),
+                    password: password,
+                    imageName: newMemberId,
+                    imageURL: imageURL
+                )
+                
+                self.dataUploadManager.addFamilyMember(for: patientId, member: newMember) { error in
+                    DispatchQueue.main.async {
+                        self.enableUIAfterUpload()
+                        if let error = error {
+                            self.showAlert(title: "Error", message: "Failed to save family member: \(error.localizedDescription)", retry: true)
+                        } else {
+                            self.showSuccessAnimation {
+                                self.showAlert(title: "Success", message: "Family member added successfully") {
+                                    self.dismiss(animated: true)
+                                }
                             }
                         }
                     }
                 }
             }
+        } catch let validationError as ValidationError {
+            showAlert(title: "Validation Error", message: validationError.message, retry: true)
+        } catch {
+            showAlert(title: "Error", message: "An unexpected error occurred", retry: true)
         }
     }
 
     private func disableUIForUpload() {
         addButton.isEnabled = false
-        addButton.setTitle("Uploading...", for: .normal)
+        addButton.setTitle("Adding \(nameTextField.text ?? "family")", for: .normal)
         activityIndicator.startAnimating()
     }
 
@@ -337,6 +431,14 @@ class AddFamilyMemberViewController: UIViewController, UIImagePickerControllerDe
                 completion()
             })
         })
+    }
+    private func showAlert(title: String, message: String, retry: Bool = false) {
+        let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        
+        let okAction = UIAlertAction(title: retry ? "Retry" : "OK", style: .default, handler: nil)
+        alertController.addAction(okAction)
+        
+        present(alertController, animated: true)
     }
 }
 

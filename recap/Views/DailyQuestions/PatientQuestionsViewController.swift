@@ -158,7 +158,7 @@ class PatientQuestionsViewController: UIViewController {
 //    private func moveToNextQuestion() {
 //        // Assuming `questions` is a list of all fetched questions
 //        guard !questions.isEmpty else { return }
-//        
+//
 //        // Logic to find the next question that needs to be asked
 //        // For example, you might have a flag `isAnswered` or `askInterval` to determine which question to show
 //        if let nextQuestion = questions.first(where: { !$0.isAnswered }) {
@@ -230,7 +230,6 @@ class PatientQuestionsViewController: UIViewController {
         
         let currentQuestion = questions[currentQuestionIndex]
         
-        // Only display the question if it's time to ask it again or it hasn't been answered yet
         if shouldAskQuestionAgain(for: currentQuestion) {
             questionLabel.text = currentQuestion.text
             
@@ -238,18 +237,49 @@ class PatientQuestionsViewController: UIViewController {
             if let imageString = currentQuestion.image, let imageData = Data(base64Encoded: imageString) {
                 questionImageView.image = UIImage(data: imageData)
             }
-            
-            // Create option buttons dynamically based on the number of answer options
+
+            // Clear previous options
             optionsContainer.arrangedSubviews.forEach { $0.removeFromSuperview() }
-            for option in currentQuestion.answerOptions {
-                let button = createOptionButton(with: option)
+
+            let options = currentQuestion.answerOptions
+            let isOdd = options.count % 2 != 0
+            let lastIndex = options.count - 1
+            
+            var currentRowStack: UIStackView?
+
+            for index in 0..<options.count {
+                if index % 2 == 0 {
+                    // Create a new horizontal stack for every two buttons
+                    currentRowStack = UIStackView()
+                    currentRowStack?.axis = .horizontal
+                    currentRowStack?.spacing = 16
+                    currentRowStack?.distribution = .fillEqually
+                    currentRowStack?.translatesAutoresizingMaskIntoConstraints = false
+                    optionsContainer.addArrangedSubview(currentRowStack!)
+                }
+                
+                let button = createOptionButton(with: options[index])
                 button.addTarget(self, action: #selector(optionSelected(_:)), for: .touchUpInside)
-                optionsContainer.addArrangedSubview(button)
+
+                // If it's the last element and count is odd, make it a full-width button
+                if isOdd && index == lastIndex {
+                    let fullWidthStack = UIStackView()
+                    fullWidthStack.axis = .horizontal
+                    fullWidthStack.spacing = 16
+                    fullWidthStack.distribution = .fill
+                    fullWidthStack.translatesAutoresizingMaskIntoConstraints = false
+                    optionsContainer.addArrangedSubview(fullWidthStack)
+
+                    fullWidthStack.addArrangedSubview(button)
+                } else {
+                    currentRowStack?.addArrangedSubview(button)
+                }
             }
         } else {
-            moveToNextQuestion() // If not time to ask, skip to next question
+            moveToNextQuestion() // Skip if not time to ask
         }
     }
+
 
 
     // MARK: - Setup UI
@@ -267,28 +297,28 @@ class PatientQuestionsViewController: UIViewController {
 
     private func setupConstraints() {
         NSLayoutConstraint.activate([
-            questionLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
+            questionLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 10),
             questionLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             questionLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
 
-            questionImageView.topAnchor.constraint(equalTo: questionLabel.bottomAnchor, constant: 20),
+            questionImageView.topAnchor.constraint(equalTo: questionLabel.bottomAnchor, constant: 10),
             questionImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             questionImageView.widthAnchor.constraint(equalToConstant: 150),
             questionImageView.heightAnchor.constraint(equalToConstant: 150),
 
-            optionsContainer.topAnchor.constraint(equalTo: questionImageView.bottomAnchor, constant: 20),
+            optionsContainer.topAnchor.constraint(equalTo: questionImageView.bottomAnchor, constant: 5),
             optionsContainer.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             optionsContainer.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
 
-            submitButton.topAnchor.constraint(equalTo: optionsContainer.bottomAnchor, constant: 30),
-            submitButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            submitButton.widthAnchor.constraint(equalToConstant: 120),
-            submitButton.heightAnchor.constraint(equalToConstant: 50),
+            submitButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -80),
+                    submitButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+                    submitButton.widthAnchor.constraint(equalToConstant: 120),
+                    submitButton.heightAnchor.constraint(equalToConstant: 50),
 
-            footerLabel.topAnchor.constraint(equalTo: submitButton.bottomAnchor, constant: 20),
-            footerLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            footerLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16)
-        ])
+                    footerLabel.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20),
+                    footerLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+                    footerLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16)
+                ])
     }
 
     // MARK: - Create Option Button
@@ -337,9 +367,67 @@ class PatientQuestionsViewController: UIViewController {
                 self?.showNextQuestionConfirmation() // Go to the next available question after submitting the answer
             }
         }
+        let streakService = StreakService(verifiedUserDocID: verifiedUserDocID)
+           
+        
+        // Update streak for today
+        streakService.updateStreakForToday(with: true)
+
+        // Update 'lastAnswered' in the user's core analytics subcollection
+        let analyticsRef = db.collection("users").document(verifiedUserDocID).collection("core").document("analytics")
+        analyticsRef.updateData([
+            "lastAnswered": Date() // This will store the current timestamp for when the last answer was submitted
+        ]) { error in
+            if let error = error {
+                print("Error updating lastAnswered: \(error.localizedDescription)")
+            } else {
+                print("lastAnswered successfully updated")
+            }
+        }
+        
+        let streaksCoresRef = db.collection("users").document(verifiedUserDocID).collection("streaksCore").document("streakData")
+
+        streaksCoresRef.getDocument { document, error in
+            if let error = error {
+                print("Error fetching streak data: \(error.localizedDescription)")
+                return
+            }
+            
+            if let document = document, document.exists {
+                let data = document.data()
+                let maxStreak = data?["maxStreak"] as? Int ?? 0
+                let currentStreak = data?["currentStreak"] as? Int ?? 0
+                let lastAnsweredTimestamp = data?["lastAnswered"] as? Timestamp
+                let lastAnsweredDate = lastAnsweredTimestamp?.dateValue()
+                
+                let today = Calendar.current.startOfDay(for: Date())
+                let lastAnsweredDay = lastAnsweredDate.map { Calendar.current.startOfDay(for: $0) }
+                
+                // If lastAnswered date is already today, do not update
+                if lastAnsweredDay == today {
+                    print("✅ Streak already updated today. Skipping update.")
+                    return
+                }
+                
+                let updatedMaxStreak = max(currentStreak + 1, maxStreak) // Ensure maxStreak is correctly updated
+                
+                // Update the streak data
+                streaksCoresRef.updateData([
+                    "activeDays": FieldValue.increment(Int64(1)),
+                    "currentStreak": FieldValue.increment(Int64(1)),
+                    "maxStreak": updatedMaxStreak,
+                    "lastAnswered": Timestamp(date: Date())
+                ]) { error in
+                    if let error = error {
+                        print("Error updating streak data: \(error.localizedDescription)")
+                    } else {
+                        print("🔥 Streak data successfully updated!")
+                    }
+                }
+            }
+        }
+
     }
-
-
 
     private func submitAnswer(_ answer: String) {
         var currentQuestion = questions[currentQuestionIndex]
@@ -415,27 +503,55 @@ class PatientQuestionsViewController: UIViewController {
     }
 
 
-
     private func displayQuestion(_ question: Question) {
         questionLabel.text = question.text
-        
+
         // Set image if available
         if let imageString = question.image, let imageData = Data(base64Encoded: imageString) {
             questionImageView.image = UIImage(data: imageData)
         }
-        
-        // Create option buttons
+
+        // Clear previous options
         optionsContainer.arrangedSubviews.forEach { $0.removeFromSuperview() }
-        for option in question.answerOptions {
-            let button = createOptionButton(with: option)
+
+        let options = question.answerOptions
+        let isOdd = options.count % 2 != 0
+        let lastIndex = options.count - 1
+
+        var currentRowStack: UIStackView?
+
+        for index in 0..<options.count {
+            if index % 2 == 0 {
+                // Create a new horizontal stack for every two buttons
+                currentRowStack = UIStackView()
+                currentRowStack?.axis = .horizontal
+                currentRowStack?.spacing = 16
+                currentRowStack?.distribution = .fillEqually
+                currentRowStack?.translatesAutoresizingMaskIntoConstraints = false
+                optionsContainer.addArrangedSubview(currentRowStack!)
+            }
+
+            let button = createOptionButton(with: options[index])
             button.addTarget(self, action: #selector(optionSelected(_:)), for: .touchUpInside)
-            optionsContainer.addArrangedSubview(button)
+
+            // If it's the last button and count is odd, make it full width
+            if isOdd && index == lastIndex {
+                let fullWidthStack = UIStackView()
+                fullWidthStack.axis = .horizontal
+                fullWidthStack.spacing = 16
+                fullWidthStack.distribution = .fill
+                fullWidthStack.translatesAutoresizingMaskIntoConstraints = false
+                optionsContainer.addArrangedSubview(fullWidthStack)
+
+                fullWidthStack.addArrangedSubview(button)
+            } else {
+                currentRowStack?.addArrangedSubview(button)
+            }
         }
-        
+
         // Update question as being asked
         updateQuestionLastAsked(question)
     }
-
 
     private func updateQuestionLastAsked(_ question: Question) {
         let questionRef = db.collection("users").document(verifiedUserDocID).collection("questions").document(question.id!)
@@ -471,3 +587,6 @@ class PatientQuestionsViewController: UIViewController {
     }
 
 }
+//#Preview {
+//    PatientQuestionsViewController()
+//}

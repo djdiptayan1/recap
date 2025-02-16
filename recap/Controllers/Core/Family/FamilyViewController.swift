@@ -9,9 +9,12 @@ import UIKit
 import SwiftUI
 
 class FamilyViewController: UIViewController {
+    var analyticsService: CoreAnalyticsService?
+    var sessionStartTime: Date?
     
     private let scrollView = UIScrollView()
     private let contentView = UIView()
+
 
     private lazy var profileButton: UIButton = {
         let button = UIButton(type: .system)
@@ -22,7 +25,11 @@ class FamilyViewController: UIViewController {
         button.addTarget(self, action: #selector(profileButtonTapped), for: .touchUpInside)
         return button
     }()
-    let dailyQuestionsVC = DailyQuestionsViewController()
+//    let dailyQuestionsVC = DailyQuestionsViewController()
+    
+    private var maxStreak: Int = 15
+    private var currentStreak: Int = 7
+    private var activeDays: Int = 30
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -30,9 +37,27 @@ class FamilyViewController: UIViewController {
         setupUI()
         applyGradientBackground()
         
+        if let verifiedUserDocID = UserDefaults.standard.string(forKey: Constants.UserDefaultsKeys.verifiedUserDocID) {
+            analyticsService = CoreAnalyticsService(verifiedUserDocID: Constants.UserDefaultsKeys.verifiedUserDocID)
+        }
+        
 //        dailyQuestionsVC.addQuestionsToFirestore()
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+            super.viewWillAppear(animated)
+            sessionStartTime = Date()
+        }
+
+        override func viewWillDisappear(_ animated: Bool) {
+            super.viewWillDisappear(animated)
+            
+            if let startTime = sessionStartTime {
+                let sessionDuration = Date().timeIntervalSince(startTime) / 60
+                analyticsService?.trackTimeSpent(sessionDuration: sessionDuration, isFamily: true)
+            }
+        }
+
     private func setupNavigationBar() {
         let profileBarButton = UIBarButtonItem(customView: profileButton)
         navigationItem.rightBarButtonItem = profileBarButton
@@ -48,37 +73,21 @@ class FamilyViewController: UIViewController {
         contentView.translatesAutoresizingMaskIntoConstraints = false
         scrollView.addSubview(contentView)
         view.addSubview(scrollView)
-        
+        let streakCard = StreakCardView()
+               streakCard.onTap = { [weak self] in
+                   if let verifiedUserDocID = UserDefaults.standard.string(forKey: Constants.UserDefaultsKeys.verifiedUserDocID) {
+                       let streaksVC = StreaksViewController(verifiedUserDocID: verifiedUserDocID)
+                       self?.navigationController?.pushViewController(streaksVC, animated: true)
+                   } else {
+                       print("Error: verifiedUserDocID not found in UserDefaults.")
+                   }
+               }
+        streakCard.updateStreakStats(maxStreak: maxStreak, currentStreak: currentStreak, activeDays: activeDays)
         let dailyQuestionCard = DailyQuestionCardView()
         dailyQuestionCard.navigateToDetail = {
-            if let verifiedUserDocID = UserDefaults.standard.string(forKey: "verifiedUserDocID") {
+            if let verifiedUserDocID = UserDefaults.standard.string(forKey: Constants.UserDefaultsKeys.verifiedUserDocID) {
                 let detailVC = DailyQuestionDetailViewController(verifiedUserDocID: verifiedUserDocID)
                 self.navigationController?.pushViewController(detailVC, animated: true)
-            } else {
-                print("Error: verifiedUserDocID not found in UserDefaults.")
-            }
-        }
-
-//        let dailyQuestionCard = DailyQuestionCardView()
-//        dailyQuestionCard.navigateToDetail = {
-//            if let verifiedUserDocID = UserDefaults.standard.string(forKey: "verifiedUserDocID") {
-//                // Create an instance of PatientQuestionsViewController
-//                let patientQuestionsVC = PatientQuestionsViewController(verifiedUserDocID: verifiedUserDocID)
-//                
-//                // Navigate to the PatientQuestionsViewController
-//                self.navigationController?.pushViewController(patientQuestionsVC, animated: true)
-//            } else {
-//                print("Error: verifiedUserDocID not found in UserDefaults.")
-//            }
-//        }
-
-       
-        // Daily Question, Streak, and Trends Cards
-        let streakCard = StreakCardView()
-        streakCard.onTap = { [weak self] in
-            if let verifiedUserDocID = UserDefaults.standard.string(forKey: "verifiedUserDocID") {
-                let streaksVC = StreaksViewController(verifiedUserDocID: verifiedUserDocID)
-                self?.navigationController?.pushViewController(streaksVC, animated: true)
             } else {
                 print("Error: verifiedUserDocID not found in UserDefaults.")
             }
@@ -108,10 +117,10 @@ class FamilyViewController: UIViewController {
 
         // Vertical StackView for Daily Question and Streak
         let dailyAndStreakStackView = UIStackView(arrangedSubviews: [dailyQuestionCard, streakCard])
-        dailyAndStreakStackView.axis = .vertical
-        dailyAndStreakStackView.spacing = 16
-        dailyAndStreakStackView.translatesAutoresizingMaskIntoConstraints = false
-
+               dailyAndStreakStackView.axis = .vertical
+               dailyAndStreakStackView.spacing = 16
+               dailyAndStreakStackView.translatesAutoresizingMaskIntoConstraints = false
+               
         let trendsCardStackView = UIStackView(arrangedSubviews: [trendsCard])
         trendsCardStackView.axis = .horizontal
         trendsCardStackView.spacing = 16

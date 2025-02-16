@@ -17,10 +17,12 @@ class PlayGameViewController: UIViewController, UICollectionViewDelegate, UIColl
 
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .vertical
-        layout.minimumInteritemSpacing = 10
+        layout.minimumInteritemSpacing = 0
         layout.minimumLineSpacing = 10
         layout.sectionInset = UIEdgeInsets(top: 10, left: 15, bottom: 10, right: 15)
-        layout.itemSize = CGSize(width: 170, height: 226)
+
+        let cellWidth = view.frame.width - 30
+        layout.itemSize = CGSize(width: cellWidth, height: 130)
 
         collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.register(GamesCell.self, forCellWithReuseIdentifier: GamesCell.identifier)
@@ -34,11 +36,10 @@ class PlayGameViewController: UIViewController, UICollectionViewDelegate, UIColl
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             collectionView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            collectionView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
-            collectionView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
-            collectionView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
         ])
-        GradientBackground()
     }
 
     private func GradientBackground() {

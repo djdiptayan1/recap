@@ -59,14 +59,14 @@ class PatientLoginViewController: UIViewController {
         return field
     }()
 
-    let rememberMeButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.setTitle(" Remember me", for: .normal)
-        button.tintColor = .black
-        button.setImage(UIImage(systemName: "checkmark.circle.fill"), for: .normal)
-        button.tintColor = .systemBlue
-        return button
-    }()
+//    let rememberMeButton: UIButton = {
+//        let button = UIButton(type: .system)
+//        button.setTitle(" Remember me", for: .normal)
+//        button.tintColor = .black
+//        button.setImage(UIImage(systemName: "checkmark.circle.fill"), for: .normal)
+//        button.tintColor = .systemBlue
+//        return button
+//    }()
 
     fileprivate let forgotPasswordButton: UIButton = {
         let button = UIButton(type: .system)
@@ -154,7 +154,8 @@ class PatientLoginViewController: UIViewController {
         view.backgroundColor = .systemBackground
 
         // Add subviews
-        [logoImageView, titleLabel, emailField, passwordField, rememberMeButton,
+        [logoImageView, titleLabel, emailField, passwordField,
+//         rememberMeButton,
          forgotPasswordButton, loginButton, dividerLabel, socialButtonsStack,
          signupPromptLabel, signupButton].forEach {
             view.addSubview($0)
@@ -193,17 +194,14 @@ class PatientLoginViewController: UIViewController {
             passwordField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
             passwordField.heightAnchor.constraint(equalToConstant: 50),
 
-            rememberMeButton.topAnchor.constraint(equalTo: passwordField.bottomAnchor, constant: 16),
-            rememberMeButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-
-            forgotPasswordButton.centerYAnchor.constraint(equalTo: rememberMeButton.centerYAnchor),
+            forgotPasswordButton.topAnchor.constraint(equalTo: passwordField.bottomAnchor, constant: 16),
             forgotPasswordButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
 
-            loginButton.topAnchor.constraint(equalTo: rememberMeButton.bottomAnchor, constant: 30),
+            loginButton.topAnchor.constraint(equalTo: forgotPasswordButton.bottomAnchor, constant: 30),
             loginButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             loginButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
             loginButton.heightAnchor.constraint(equalToConstant: 50),
-
+            
             dividerLabel.topAnchor.constraint(equalTo: loginButton.bottomAnchor, constant: 30),
             dividerLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
 
@@ -218,7 +216,7 @@ class PatientLoginViewController: UIViewController {
         ])
 
         // Add targets
-        rememberMeButton.addTarget(self, action: #selector(toggleRememberMe), for: .touchUpInside)
+//        rememberMeButton.addTarget(self, action: #selector(toggleRememberMe), for: .touchUpInside)
         loginButton.addTarget(self, action: #selector(loginTapped), for: .touchUpInside)
         signupButton.addTarget(self, action: #selector(signupTapped), for: .touchUpInside)
         googleButton.addTarget(self, action: #selector(googleLoginTapped), for: .touchUpInside)
@@ -233,9 +231,9 @@ class PatientLoginViewController: UIViewController {
         sender.setImage(UIImage(systemName: imageName), for: .normal)
     }
 
-    @objc private func toggleRememberMe() {
-        isRemembered.toggle()
-        let imageName = isRemembered ? "checkmark.circle.fill" : "circle"
-        rememberMeButton.setImage(UIImage(systemName: imageName), for: .normal)
-    }
+//    @objc private func toggleRememberMe() {
+//        isRemembered.toggle()
+//        let imageName = isRemembered ? "checkmark.circle.fill" : "circle"
+//        rememberMeButton.setImage(UIImage(systemName: imageName), for: .normal)
+//    }
 }

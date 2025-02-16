@@ -12,9 +12,9 @@ import GoogleSignIn
 import UIKit
 
 extension PatientLoginViewController {
-    @objc func rememberMeTapped() {
-        rememberMeButton.isSelected.toggle()
-    }
+//    @objc func rememberMeTapped() {
+//        rememberMeButton.isSelected.toggle()
+//    }
 
     @objc func loginTapped() {
         print("Login tapped")
@@ -120,6 +120,9 @@ extension PatientLoginViewController {
     }
 
     private func fetchOrCreateUserProfile(userId: String, email: String) {
+        UserDefaults.standard
+            .set(true, forKey: Constants.UserDefaultsKeys.isPatientLoggedIn)
+        UserDefaults.standard.synchronize()
         let db = Firestore.firestore()
 
         db.collection("users").document(userId).getDocument { [weak self] document, error in

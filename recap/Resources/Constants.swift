@@ -9,32 +9,29 @@ import Foundation
 
 enum Constants {
     enum UserDefaultsKeys {
+        static let HasCompletedOnboarding = "HasCompletedOnboarding"
+        
         static let isFamilyMemberLoggedIn = "isUserLoggedIn"
         static let hasPatientCompletedProfile = "hasCompletedProfile"
+        
         static let verifiedUserDocID = "verifiedUserDocID"
+        
         static let familyMemberDetails = "familyMemberDetails"
         static let familyMemberImageURL = "familyMemberImageURL"
-        static let patientDetails = "patientDetails"
-
-        static let patientProfile = "patientProfile"
+        
         static let isPatientLoggedIn = "isPatientLoggedIn"
+        static let patientDetails = "patientDetails"
     }
 
     enum FirestoreKeys {
         static let usersCollection = "users"
-        static let ArticleCollection = "Articles"
         static let familyMembersCollection = "family_members"
-        static let RapidQuestionDBName = "rapidMemoryQuestions"
-        static let RapidQuestionReport = "memoryCheckReports"
-        
     }
 
     enum StorageKeys {
-        static let profileImage = "profileImage"
-        static let patientProfile = "PatientProfile"
     }
 
     enum NotificationNames {
-        static let familyMemberAdded = "familyMemberAdded"
+        static let FamilyMemberAdded = "FamilyMemberAdded"
     }
 }

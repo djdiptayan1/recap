@@ -220,19 +220,6 @@ extension ProfileViewController: UITableViewDelegate, UITableViewDataSource {
                 "Blood Type",
                 "Stage",
             ]
-//            let values: [String] = {
-//                if let details = dataProtocol.getProfile() {
-//                    return [
-//                        details["firstName"] as? String ?? "Not Set",
-//                        details["lastName"] as? String ?? "Not Set",
-//                        details["dateOfBirth"] as? String ?? "Not Set",
-//                        details["sex"] as? String ?? "Not Set",
-//                        details["bloodGroup"] as? String ?? "Not Set",
-//                        details["stage"] as? String ?? "Not Set",
-//                    ]
-//                }
-//                return Array(repeating: "Not Set", count: 6)
-//            }()
             UserDefaultsStorageProfile.shared.getProfile()
             let values: [String] = {
                 if let details = UserDefaultsStorageProfile.shared.getProfile() {

@@ -4,6 +4,7 @@
 //
 //  Created by admin70 on 15/01/25.
 //
+
 import UIKit
 
 class StreakCardView: UIView {
@@ -42,18 +43,32 @@ class StreakCardView: UIView {
         return stackView
     }()
 
+    // Labels to update dynamically
+    private var maxStreakLabel: UILabel!
+    private var currentStreakLabel: UILabel!
+    private var activeDaysLabel: UILabel!
+
     init() {
         super.init(frame: .zero)
         setupUI()
         addTapGesture()
+        fetchStreakData()  // Fetch saved streak data on initialization
     }
 
     required init?(coder: NSCoder) {
         super.init(coder: coder)
         setupUI()
         addTapGesture()
+        fetchStreakData()  // Fetch saved streak data on initialization
     }
 
+    override func didMoveToWindow() {
+        super.didMoveToWindow()
+        fetchStreakData()
+    }
+
+
+    
     private func setupUI() {
         backgroundColor = .white
         layer.cornerRadius = 12
@@ -61,7 +76,7 @@ class StreakCardView: UIView {
         layer.shadowOpacity = 0.1
         layer.shadowOffset = CGSize(width: 0, height: 2)
         layer.shadowRadius = 4
-        
+
         addSubview(streaksLabel)
         addSubview(arrowImageView)
         addSubview(separatorView)
@@ -71,9 +86,14 @@ class StreakCardView: UIView {
         let currentStreakView = createStatView(title: "Current Streak", value: "0")
         let activeDaysView = createStatView(title: "Active Days", value: "0")
 
-        statsStackView.addArrangedSubview(maxStreakView)
-        statsStackView.addArrangedSubview(currentStreakView)
-        statsStackView.addArrangedSubview(activeDaysView)
+        // Store references to value labels
+        self.maxStreakLabel = maxStreakView.1
+        self.currentStreakLabel = currentStreakView.1
+        self.activeDaysLabel = activeDaysView.1
+
+        statsStackView.addArrangedSubview(maxStreakView.0)
+        statsStackView.addArrangedSubview(currentStreakView.0)
+        statsStackView.addArrangedSubview(activeDaysView.0)
 
         NSLayoutConstraint.activate([
             streaksLabel.topAnchor.constraint(equalTo: topAnchor, constant: 16),
@@ -98,17 +118,18 @@ class StreakCardView: UIView {
         ])
     }
 
-    private func createStatView(title: String, value: String) -> UIView {
+    private func createStatView(title: String, value: String) -> (UIView, UILabel) {
         let statView = UIView()
+
+        let valueLabel = UILabel()
+        valueLabel.text = value
+        valueLabel.font = UIFont.systemFont(ofSize: 25, weight: .bold)
+        valueLabel.textColor = .systemOrange
+
         let titleLabel = UILabel()
         titleLabel.text = title
         titleLabel.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
         titleLabel.textColor = .black
-
-        let valueLabel = UILabel()
-        valueLabel.text = value
-        valueLabel.font = UIFont.systemFont(ofSize: 25, weight: .bold) // Increased font size
-        valueLabel.textColor = .systemOrange
 
         let stackView = UIStackView(arrangedSubviews: [valueLabel, titleLabel])
         stackView.axis = .vertical
@@ -123,7 +144,35 @@ class StreakCardView: UIView {
             stackView.centerYAnchor.constraint(equalTo: statView.centerYAnchor)
         ])
 
-        return statView
+        return (statView, valueLabel)
+    }
+
+    // Fetch stored streak stats from UserDefaults
+    private func fetchStreakData() {
+        let maxStreak = UserDefaults.standard.integer(forKey: "maxStreak")
+        let currentStreak = UserDefaults.standard.integer(forKey: "currentStreak")
+        let activeDays = UserDefaults.standard.integer(forKey: "activeDays")
+
+        print("Fetched Streak Data:")
+        print("Max Streak: \(maxStreak)")
+        print("Current Streak: \(currentStreak)")
+        print("Active Days: \(activeDays)")
+
+        updateStreakStats(maxStreak: maxStreak, currentStreak: currentStreak, activeDays: activeDays)
+    }
+
+    // Update streak stats with dynamic values
+    func updateStreakStats(maxStreak: Int, currentStreak: Int, activeDays: Int) {
+        DispatchQueue.main.async {
+            print("Updating UI with Streak Data:")
+            print("Max Streak: \(maxStreak)")
+            print("Current Streak: \(currentStreak)")
+            print("Active Days: \(activeDays)")
+
+            self.maxStreakLabel.text = "\(maxStreak)"
+            self.currentStreakLabel.text = "\(currentStreak)"
+            self.activeDaysLabel.text = "\(activeDays)"
+        }
     }
 
     private func addTapGesture() {
@@ -136,7 +185,6 @@ class StreakCardView: UIView {
         onTap?()
     }
 }
-
-#Preview(){
+#Preview {
     StreakCardView()
 }

@@ -122,7 +122,8 @@ class FamilyViewController_patient: UIViewController, UICollectionViewDelegate, 
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(handleFamilyMemberAdded),
-            name: Notification.Name("FamilyMemberAdded"),
+            name: Notification
+                .Name(Constants.NotificationNames.FamilyMemberAdded),
             object: nil
         )
     }
@@ -156,7 +157,8 @@ class FamilyViewController_patient: UIViewController, UICollectionViewDelegate, 
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(handleFamilyMemberAdded),
-            name: Notification.Name("FamilyMemberAdded"),
+            name: Notification
+                .Name(Constants.NotificationNames.FamilyMemberAdded),
             object: nil
         )
     }
@@ -270,15 +272,20 @@ class FamilyViewController_patient: UIViewController, UICollectionViewDelegate, 
 
         // Start by deleting the family member from Firebase
         FirebaseManager.shared.deleteFamilyMember(for: patientId, memberId: member.id) { [weak self] error in
-            if let error = error {
-                print("Failed to delete family member: \(error.localizedDescription)")
-                self?.showAlert(title: "Error", message: "Failed to delete family member.")
-            } else {
-                print("Family member deleted successfully")
-                self?.familyMembers.remove(at: indexPath.row)
-                self?.dataProtocol.saveFamilyMembers(self?.familyMembers ?? [])
-                DispatchQueue.main.async {
-                    self?.collectionView.deleteItems(at: [indexPath])
+            guard let self = self else { return }
+            
+            DispatchQueue.main.async {
+                if let error = error {
+                    print("Failed to delete family member: \(error.localizedDescription)")
+                    self.showAlert(title: "Error", message: "Failed to delete family member.")
+                } else {
+                    print("Family member deleted successfully")
+                    // Make sure the index is still valid
+                    if indexPath.row < self.familyMembers.count {
+                        self.familyMembers.remove(at: indexPath.row)
+                        self.dataProtocol.saveFamilyMembers(self.familyMembers)
+                        self.collectionView.deleteItems(at: [indexPath])
+                    }
                 }
             }
         }

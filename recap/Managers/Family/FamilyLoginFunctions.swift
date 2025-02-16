@@ -18,7 +18,7 @@ extension FamilyLoginViewController {
         // Animate the verify button to indicate processing
         let spinner = UIActivityIndicatorView(style: .medium)
         spinner.startAnimating()
-        spinner.color = .white
+        spinner.color = .systemBlue
         verifyButton.setTitle("", for: .normal)
         verifyButton.addSubview(spinner)
         spinner.center = CGPoint(x: verifyButton.bounds.midX, y: verifyButton.bounds.midY)
@@ -196,10 +196,10 @@ extension FamilyLoginViewController {
         view.layer.add(shake, forKey: "position")
     }
 
-    @objc func rememberMeTapped() {
-        rememberMeButton.isSelected.toggle()
-        print("Remember me tapped. Current state: \(rememberMeButton.isSelected ? "Selected" : "Deselected")")
-    }
+//    @objc func rememberMeTapped() {
+//        rememberMeButton.isSelected.toggle()
+//        print("Remember me tapped. Current state: \(rememberMeButton.isSelected ? "Selected" : "Deselected")")
+//    }
 
     @objc func logoutTapped() {
         do {
