@@ -33,8 +33,9 @@ class PatientsViewController: UIViewController, UITableViewDelegate, UITableView
         let tableView = UITableView()
         tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.isScrollEnabled = false
-        tableView.layer.cornerRadius = 10
+        tableView.layer.cornerRadius = Constants.CardSize.DefaultCardCornerRadius
         tableView.layer.masksToBounds = true
+        tableView.isUserInteractionEnabled = false
         return tableView
     }()
 
@@ -43,7 +44,6 @@ class PatientsViewController: UIViewController, UITableViewDelegate, UITableView
         view.backgroundColor = .systemBackground
         title = "Patient"
         navigationController?.navigationBar.prefersLargeTitles = false
-        setupNavigationBar()
         setupUI()
         setupTableView()
         
@@ -77,17 +77,6 @@ class PatientsViewController: UIViewController, UITableViewDelegate, UITableView
         }
     }
 
-    
-
-    private func setupNavigationBar() {
-        let doneButton = UIBarButtonItem(
-            title: "Done",
-            style: .done,
-            target: self,
-            action: #selector(doneButtonTapped)
-        )
-        navigationItem.rightBarButtonItem = doneButton
-    }
 
     @objc private func doneButtonTapped() {
         navigationController?.popViewController(animated: true)

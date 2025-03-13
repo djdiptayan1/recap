@@ -31,7 +31,7 @@ class PatientLoginViewController: UIViewController {
         field.placeholder = "Email address"
         field.keyboardType = .emailAddress
         field.backgroundColor = .systemGray6
-        field.layer.cornerRadius = 12
+        field.layer.cornerRadius = Constants.CardSize.DefaultCardCornerRadius
         field.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 10, height: 0))
         field.leftViewMode = .always
         field.autocapitalizationType = .none
@@ -43,7 +43,7 @@ class PatientLoginViewController: UIViewController {
         field.placeholder = "Password"
         field.isSecureTextEntry = true
         field.backgroundColor = .systemGray6
-        field.layer.cornerRadius = 12
+        field.layer.cornerRadius = Constants.CardSize.DefaultCardCornerRadius
         field.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 10, height: 0))
         field.leftViewMode = .always
 
@@ -80,7 +80,7 @@ class PatientLoginViewController: UIViewController {
         button.setTitle("Log in", for: .normal)
         button.backgroundColor = .systemBlue.withAlphaComponent(0.2)
         button.setTitleColor(.systemBlue, for: .normal)
-        button.layer.cornerRadius = 12
+        button.layer.cornerRadius = Constants.CardSize.DefaultCardCornerRadius
         button.titleLabel?.font = .systemFont(ofSize: 17, weight: .semibold)
         return button
     }()
@@ -107,7 +107,7 @@ class PatientLoginViewController: UIViewController {
         button.setImage(UIImage(named: "google"), for: .normal)
         button.imageView?.contentMode = .scaleAspectFit
         button.backgroundColor = .systemBackground
-        button.layer.cornerRadius = 12
+        button.layer.cornerRadius = Constants.CardSize.DefaultCardCornerRadius
         button.layer.borderWidth = 1
         button.layer.borderColor = UIColor.systemGray4.cgColor
         return button
@@ -119,7 +119,7 @@ class PatientLoginViewController: UIViewController {
         button.imageView?.contentMode = .scaleAspectFit
         button.backgroundColor = .systemBackground
         button.tintColor = .label
-        button.layer.cornerRadius = 12
+        button.layer.cornerRadius = Constants.CardSize.DefaultCardCornerRadius
         button.layer.borderWidth = 1
         button.layer.borderColor = UIColor.systemGray4.cgColor
         return button

@@ -73,7 +73,7 @@ class ArticleDetailViewController: UIViewController {
         super.viewDidLoad()
         
         view.backgroundColor = .white
-        title = article.title
+//        title = "Article"
         setupLayout()
         
         // Set article details

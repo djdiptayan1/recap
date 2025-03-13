@@ -134,66 +134,119 @@ class DailyQuestionDetailViewController: UIViewController, UITableViewDelegate, 
 
 
     // Load Questions from Firestore (No longer used in the timer selector)
+//    @objc func loadQuestions() {
+//        let currentTime = Date()
+//
+//        // Only proceed if it's been more than the set interval (20 seconds) since the last fetch
+//        if let lastFetch = lastFetchTime, currentTime.timeIntervalSince(lastFetch) < fetchInterval {
+//            print("✅ It's within \(Int(fetchInterval)) seconds. Skipping fetch.")
+//            tableView.reloadData()
+//            return
+//        }
+//
+//        print("🔄 Fetching questions...")
+//
+//        let db = Firestore.firestore()
+//        let userQuestionsRef = db.collection("users").document(verifiedUserDocID).collection("questions")
+//
+//        // Skip collection check and directly fetch new questions on timer-based fetch
+//        userQuestionsRef.getDocuments { [weak self] (snapshot, error) in
+//            guard let self = self else { return }
+//
+//            if let error = error {
+//                print("❌ Firestore error while checking questions collection: \(error.localizedDescription)")
+//                return
+//            }
+//
+//            if let snapshot = snapshot, !snapshot.isEmpty {
+//                print("📌 Found existing questions in Firestore.")
+//                
+//                // Filter questions where correctAnswers is empty
+//                let filteredQuestions = snapshot.documents.compactMap { doc in
+//                    do {
+//                        var question = try doc.data(as: Question.self)
+//                        
+//                        // Check if the question has an empty correctAnswers field
+//                        if question.correctAnswers?.isEmpty ?? true {
+//                            return question
+//                        } else {
+//                            return nil // Ignore questions where correctAnswers is not empty
+//                        }
+//                    } catch {
+//                        print("❌ Error decoding question: \(error)")
+//                        return nil
+//                    }
+//                }
+//
+//                if !filteredQuestions.isEmpty {
+//                    // If questions are found with empty correctAnswers, add to questions array
+//                    self.questions.append(contentsOf: filteredQuestions)
+//                    self.tableView.reloadData()
+//                } else {
+//                    // If no questions with empty correctAnswers, fetch 7 random questions
+//                    print("⚠️ No questions with empty correctAnswers. Fetching 7 random questions.")
+//                    self.fetchRandomQuestions(from: userQuestionsRef)
+//                }
+//            } else {
+//                // If collection is empty or no valid questions are found, fetch fresh questions from the server
+//                print("⚠️ No questions found in Firestore. Fetching new questions...")
+//                self.fetchNewQuestions()
+//            }
+//        }
+//    }
+    
     @objc func loadQuestions() {
         let currentTime = Date()
 
-        // Only proceed if it's been more than the set interval (20 seconds) since the last fetch
         if let lastFetch = lastFetchTime, currentTime.timeIntervalSince(lastFetch) < fetchInterval {
             print("✅ It's within \(Int(fetchInterval)) seconds. Skipping fetch.")
             tableView.reloadData()
             return
         }
 
-        print("🔄 Fetching questions...")
+        print("🔄 Evaluating memory report before fetching questions...")
 
-        let db = Firestore.firestore()
-        let userQuestionsRef = db.collection("users").document(verifiedUserDocID).collection("questions")
-
-        // Skip collection check and directly fetch new questions on timer-based fetch
-        userQuestionsRef.getDocuments { [weak self] (snapshot, error) in
+        evaluateAndStoreMemoryReport(for: verifiedUserDocID) { [weak self] in
             guard let self = self else { return }
+            print("🔄 Fetching questions...")
 
-            if let error = error {
-                print("❌ Firestore error while checking questions collection: \(error.localizedDescription)")
-                return
-            }
+            let db = Firestore.firestore()
+            let userQuestionsRef = db.collection("users").document(verifiedUserDocID).collection("questions")
 
-            if let snapshot = snapshot, !snapshot.isEmpty {
-                print("📌 Found existing questions in Firestore.")
-                
-                // Filter questions where correctAnswers is empty
-                let filteredQuestions = snapshot.documents.compactMap { doc in
-                    do {
-                        var question = try doc.data(as: Question.self)
-                        
-                        // Check if the question has an empty correctAnswers field
-                        if question.correctAnswers?.isEmpty ?? true {
-                            return question
-                        } else {
-                            return nil // Ignore questions where correctAnswers is not empty
+            userQuestionsRef.getDocuments { (snapshot, error) in
+                if let error = error {
+                    print("❌ Firestore error while checking questions collection: \(error.localizedDescription)")
+                    return
+                }
+
+                if let snapshot = snapshot, !snapshot.isEmpty {
+                    print("📌 Found existing questions in Firestore.")
+                    
+                    let filteredQuestions = snapshot.documents.compactMap { doc -> Question? in
+                        do {
+                            var question = try doc.data(as: Question.self)
+                            return question.correctAnswers?.isEmpty ?? true ? question : nil
+                        } catch {
+                            print("❌ Error decoding question: \(error)")
+                            return nil
                         }
-                    } catch {
-                        print("❌ Error decoding question: \(error)")
-                        return nil
                     }
-                }
 
-                if !filteredQuestions.isEmpty {
-                    // If questions are found with empty correctAnswers, add to questions array
-                    self.questions.append(contentsOf: filteredQuestions)
-                    self.tableView.reloadData()
+                    if !filteredQuestions.isEmpty {
+                        self.questions.append(contentsOf: filteredQuestions)
+                        self.tableView.reloadData()
+                    } else {
+                        print("⚠️ No questions with empty correctAnswers. Fetching 7 random questions.")
+                        self.fetchRandomQuestions(from: userQuestionsRef)
+                    }
                 } else {
-                    // If no questions with empty correctAnswers, fetch 7 random questions
-                    print("⚠️ No questions with empty correctAnswers. Fetching 7 random questions.")
-                    self.fetchRandomQuestions(from: userQuestionsRef)
+                    print("⚠️ No questions found in Firestore. Fetching new questions...")
+                    self.fetchNewQuestions()
                 }
-            } else {
-                // If collection is empty or no valid questions are found, fetch fresh questions from the server
-                print("⚠️ No questions found in Firestore. Fetching new questions...")
-                self.fetchNewQuestions()
             }
         }
     }
+
 
     // Fetch 7 Random Questions
     private func fetchRandomQuestions(from collectionRef: CollectionReference) {

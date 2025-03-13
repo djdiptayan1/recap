@@ -63,9 +63,9 @@ class PatientQuestionsViewController: UIViewController {
         let button = UIButton(type: .system)
         button.setTitle("Submit", for: .normal)
         button.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)
-        button.setTitleColor(.white, for: .normal)
-        button.backgroundColor = UIColor.systemBlue
-        button.layer.cornerRadius = 10
+        button.setTitleColor(.systemBlue, for: .normal)
+        button.backgroundColor = UIColor.systemBlue.withAlphaComponent(0.2)
+        button.layer.cornerRadius = Constants.CardSize.DefaultCardCornerRadius
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
@@ -83,7 +83,7 @@ class PatientQuestionsViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = UIColor(white: 0.95, alpha: 1.0)
+        view.backgroundColor = Constants.BGs.GreyBG
         setupUI()
         fetchQuestionsFromFirestore() // Fetch all questions for the user
     }
@@ -110,6 +110,7 @@ class PatientQuestionsViewController: UIViewController {
 
             if self.questions.isEmpty {
                 print("⚠️ No questions found.")
+                showNoQuestionsReadyAlert()
                 return
             }
 
@@ -135,6 +136,7 @@ class PatientQuestionsViewController: UIViewController {
 
         if !displayedAny {
             print("⚠️ No questions to display!")
+            showNoQuestionsReadyAlert()
         }
     }
 
@@ -328,7 +330,7 @@ class PatientQuestionsViewController: UIViewController {
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16)
         button.setTitleColor(.black, for: .normal)
         button.backgroundColor = .white
-        button.layer.cornerRadius = 10
+        button.layer.cornerRadius = Constants.CardSize.DefaultCardCornerRadius
         button.layer.borderWidth = 1
         button.layer.borderColor = UIColor.lightGray.cgColor
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -499,7 +501,8 @@ class PatientQuestionsViewController: UIViewController {
         }
 
         print("🚫 No more questions available.")
-        exitQuestionFlow()
+//        exitQuestionFlow()
+        showNoQuestionsReadyAlert()
     }
 
 
@@ -562,18 +565,16 @@ class PatientQuestionsViewController: UIViewController {
 
     
     private func showNoQuestionsReadyAlert() {
-        let alertController = UIAlertController(
-            title: "No Questions Ready",
-            message: "All questions are either answered or not due for asking yet.",
-            preferredStyle: .alert
-        )
+        let successVC = SuccessQuestionsViewController()
+        successVC.modalPresentationStyle = .overFullScreen
+        successVC.modalTransitionStyle = .crossDissolve
         
-        let exitAction = UIAlertAction(title: "Exit", style: .cancel) { [weak self] _ in
+        // Set the exit action
+        successVC.onExitTapped = { [weak self] in
             self?.exitQuestionFlow()
         }
         
-        alertController.addAction(exitAction)
-        present(alertController, animated: true, completion: nil)
+        present(successVC, animated: true, completion: nil)
     }
 
 

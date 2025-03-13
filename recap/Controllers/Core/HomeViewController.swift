@@ -102,50 +102,57 @@ class HomeViewController: UIViewController {
         contentView.spacing = 16
         contentView.translatesAutoresizingMaskIntoConstraints = false
         
-        NSLayoutConstraint.activate([
+        NSLayoutConstraint.activate(
+[
             contentView.topAnchor.constraint(equalTo: scrollView.topAnchor, constant: 16),
-            contentView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor, constant: 16),
-            contentView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor, constant: -16),
-            contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor, constant: -16),
+            contentView.leadingAnchor
+                .constraint(
+                    equalTo: scrollView.leadingAnchor,
+                    constant: Constants
+                        .paddingKeys.DefaultPaddingLeft),
+            contentView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor, constant: Constants
+                .paddingKeys.DefaultPaddingRight),
+            contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor, constant: Constants
+                .paddingKeys.DefaultPaddingBottom),
             contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor, constant: -32)
-        ])
+        ]
+)
     }
     
     private func setupContent() {
+        contentView.spacing = Constants.paddingKeys.DefaultPaddingLeft+8
         let questionsCard = QuestionsCardView()
         let streaksCard = StreakCardView()
         let letsReadCard = LetsReadCardView()
-//        let playGameCard = PlayGameCardView()
         
-        // First, add Questions and Streaks cards
         [questionsCard, streaksCard].forEach { item in
             item.translatesAutoresizingMaskIntoConstraints = false
             contentView.addArrangedSubview(item)
-            NSLayoutConstraint.activate([
-                item.heightAnchor.constraint(equalToConstant: 150)
-            ])
+            NSLayoutConstraint.activate(
+[
+                item.heightAnchor
+                    .constraint(
+                        equalToConstant: Constants.CardSize.DefaultCardHeight
+                    )
+            ]
+)
         }
 
-        // Add the "Activities" title label
-        contentView.addArrangedSubview(activitiesTitleLabel)
+//        contentView.addArrangedSubview(activitiesTitleLabel)
         
-        // Now, add Let's Read and Play Game cards
         [letsReadCard,
-//         playGameCard
         ]
             .forEach { item in
             item.translatesAutoresizingMaskIntoConstraints = false
             contentView.addArrangedSubview(item)
             NSLayoutConstraint.activate([
-                item.heightAnchor.constraint(equalToConstant: 150)
+                item.heightAnchor.constraint(equalToConstant: Constants.CardSize.DefaultCardHeight)
             ])
         }
         
-        // Add tap gestures
         addTapGesture(to: questionsCard, action: #selector(navigateToQuestions))
         addTapGesture(to: streaksCard, action: #selector(navigateToStreaks))
         addTapGesture(to: letsReadCard, action: #selector(navigateToLetsRead))
-//        addTapGesture(to: playGameCard, action: #selector(navigateToPlayGame))
     }
 
     private func addTapGesture(to view: UIView, action: Selector) {
@@ -177,11 +184,6 @@ class HomeViewController: UIViewController {
     @objc private func navigateToLetsRead() {
         let articlesVC = ArticleTableViewController(preloadedArticles: preloadedArticles)
         navigationController?.pushViewController(articlesVC, animated: true)
-    }
-    
-    @objc private func navigateToPlayGame() {
-        let playGameVC = PlayGameViewController()
-        navigationController?.pushViewController(playGameVC, animated: true)
     }
     
     private func applyGradientBackground() {

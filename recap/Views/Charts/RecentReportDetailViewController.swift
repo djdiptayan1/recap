@@ -14,21 +14,34 @@ struct BarChartView: View {
     var body: some View {
         Chart {
             ForEach(data) { dayData in
+                let shortDay = String(dayData.day.prefix(3)) // Use only first 3 letters
+                let total = dayData.correctAnswers + dayData.incorrectAnswers
+                let maxValue = max(dayData.correctAnswers, dayData.incorrectAnswers) // Highest bar value
+
                 BarMark(
-                    x: .value("Week", dayData.week),
-                    y: .value("Correct Answers", dayData.correctAnswers)
+                    x: .value("Day", shortDay),
+                    y: .value("Correct", dayData.correctAnswers)
                 )
                 .foregroundStyle(Color.customLightPurple)
-                
+                .annotation(position: .top, alignment: .center) {
+                    if dayData.correctAnswers >= dayData.incorrectAnswers {
+                        Text("\(total)")
+                            .font(.caption)
+                            .foregroundColor(.primary)
+                    }
+                }
+
                 BarMark(
-                    x: .value("Week", dayData.week),
-                    y: .value("Incorrect Answers", dayData.incorrectAnswers)
+                    x: .value("Day", shortDay),
+                    y: .value("Incorrect", dayData.incorrectAnswers)
                 )
                 .foregroundStyle(Color.customLightRed)
-                .annotation(position: .top) {
-                    Text("\(dayData.correctAnswers + dayData.incorrectAnswers)")
-                        .font(.caption)
-                        .foregroundColor(.primary)
+                .annotation(position: .top, alignment: .center) {
+                    if dayData.incorrectAnswers > dayData.correctAnswers {
+                        Text("\(total)")
+                            .font(.caption)
+                            .foregroundColor(.primary)
+                    }
                 }
             }
         }
@@ -41,9 +54,13 @@ struct BarChartView: View {
     }
 }
 
+
+
+
 struct RecentReportDetailViewController: View {
-    var data: [RecentMemoryData]
-    
+    let verifiedUserDocID: String
+    @StateObject private var recentMemoryDataModel = RecentMemoryDataModel()
+
     var body: some View {
         ZStack {
             // Background Gradient
@@ -65,29 +82,65 @@ struct RecentReportDetailViewController: View {
                         Spacer()
                     }
                     .padding(.horizontal)
-                    
-                    // Bar Chart section
-                    VStack(spacing: 15) {
-                        BarChartView(data: data)
-                            .frame(width: 300, height: 250) // Standardized dimensions
-                            .padding()
-                            .background(RoundedRectangle(cornerRadius: 15).fill(Color.white))
-                            .padding(.horizontal)
-                    }
-                    
-                    // Chart Legend section
+
+                    // Week Navigation Buttons
                     HStack {
-                        Label("Correct", systemImage: "circle.fill")
-                            .foregroundColor(.customLightPurple)
-                            .font(.caption2)
-                        
-                        Label("Incorrect", systemImage: "circle.fill")
-                            .foregroundColor(.customLightRed)
-                            .font(.caption2)
+                        Button(action: {
+                            recentMemoryDataModel.goToPreviousWeek(for: verifiedUserDocID, selectedMonth: getCurrentMonth())
+                        }) {
+                            Image(systemName: "chevron.left")
+                                .font(.title2)
+                                .foregroundColor(recentMemoryDataModel.selectedWeekIndex > 0 ? .black : .gray)
+                        }
+                        .disabled(recentMemoryDataModel.selectedWeekIndex == 0)
+
+                        Text("Week \(recentMemoryDataModel.selectedWeekIndex + 1)")
+                            .font(.headline)
+                            .padding(.horizontal)
+
+                        Button(action: {
+                            recentMemoryDataModel.goToNextWeek(for: verifiedUserDocID, selectedMonth: getCurrentMonth())
+                        }) {
+                            Image(systemName: "chevron.right")
+                                .font(.title2)
+                                .foregroundColor(recentMemoryDataModel.selectedWeekIndex < recentMemoryDataModel.availableWeeks.count - 1 ? .black : .gray)
+                        }
+                        .disabled(recentMemoryDataModel.selectedWeekIndex == recentMemoryDataModel.availableWeeks.count - 1)
                     }
                     .padding(.horizontal)
-                    
-                    // About Insights section
+
+                    // Bar Chart Section
+                    VStack(spacing: 15) {
+                        BarChartView(data: recentMemoryDataModel.recentMemoryData)
+                            .frame(width: 300, height: 250)
+                            .padding()
+                            .background(RoundedRectangle(cornerRadius: Constants.CardSize.DefaultCardCornerRadius).fill(Color.white))
+                            .padding(.horizontal)
+                    }
+
+                    // Chart Legend Section
+                    HStack {
+                        Label {
+                            Text("Correct")
+                                .font(.caption2)
+                        } icon: {
+                            Image(systemName: "circle.fill")
+                                .foregroundColor(.customLightPurple)
+                        }
+                        
+                        Spacer()
+                        
+                        Label {
+                            Text("Incorrect")
+                                .font(.caption2)
+                        } icon: {
+                            Image(systemName: "circle.fill")
+                                .foregroundColor(.customLightRed)
+                        }
+                    }
+                    .padding(.horizontal)
+
+                    // About Insights Section
                     VStack(alignment: .leading, spacing: 10) {
                         Text("About Recent Insights")
                             .font(.headline)
@@ -111,11 +164,15 @@ struct RecentReportDetailViewController: View {
                 .padding()
             }
         }
+        .onAppear {
+            let currentMonth = getCurrentMonth()
+            recentMemoryDataModel.fetchWeeks(for: verifiedUserDocID, selectedMonth: currentMonth)
+        }
     }
-}
 
-struct RecentReportDetailViewController_Previews: PreviewProvider {
-    static var previews: some View {
-        RecentReportDetailViewController(data: recentMemoryData)
+    private func getCurrentMonth() -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM"
+        return formatter.string(from: Date())
     }
 }

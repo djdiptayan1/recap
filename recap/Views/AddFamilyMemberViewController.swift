@@ -67,24 +67,30 @@ class AddFamilyMemberViewController: UIViewController, UIImagePickerControllerDe
     private let nameTextField: UITextField = {
         let textField = UITextField()
         textField.placeholder = "Full Name"
-        textField.borderStyle = .roundedRect
-        textField.font = .systemFont(ofSize: 17)
+        textField.layer.cornerRadius = Constants.CardSize.DefaultCardCornerRadius
+        textField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 10, height: 0))
+        textField.leftViewMode = .always
+        textField.backgroundColor = .systemGray6
         return textField
     }()
 
     private let relationshipTextField: UITextField = {
         let textField = UITextField()
         textField.placeholder = "Relationship (e.g., Son, Daughter)"
-        textField.borderStyle = .roundedRect
-        textField.font = .systemFont(ofSize: 17)
+        textField.layer.cornerRadius = Constants.CardSize.DefaultCardCornerRadius
+        textField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 10, height: 0))
+        textField.leftViewMode = .always
+        textField.backgroundColor = .systemGray6
         return textField
     }()
 
     private let phoneTextField: UITextField = {
         let textField = UITextField()
         textField.placeholder = "Phone Number"
-        textField.borderStyle = .roundedRect
-        textField.font = .systemFont(ofSize: 17)
+        textField.layer.cornerRadius = Constants.CardSize.DefaultCardCornerRadius
+        textField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 10, height: 0))
+        textField.leftViewMode = .always
+        textField.backgroundColor = .systemGray6
         textField.keyboardType = .phonePad
         return textField
     }()
@@ -99,8 +105,10 @@ class AddFamilyMemberViewController: UIViewController, UIImagePickerControllerDe
     private let emailTextField: UITextField = {
         let textField = UITextField()
         textField.placeholder = "Email Address"
-        textField.borderStyle = .roundedRect
-        textField.font = .systemFont(ofSize: 17)
+        textField.layer.cornerRadius = Constants.CardSize.DefaultCardCornerRadius
+        textField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 10, height: 0))
+        textField.leftViewMode = .always
+        textField.backgroundColor = .systemGray6
         textField.keyboardType = .emailAddress
         textField.autocapitalizationType = .none
         return textField
@@ -116,8 +124,11 @@ class AddFamilyMemberViewController: UIViewController, UIImagePickerControllerDe
     private let passwordTextField: UITextField = {
         let textField = UITextField()
         textField.placeholder = "Password"
-        textField.borderStyle = .roundedRect
-        textField.font = .systemFont(ofSize: 17)
+        textField.layer.cornerRadius = Constants.CardSize.DefaultCardCornerRadius
+        textField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 10, height: 0))
+        textField.leftViewMode = .always
+        textField.backgroundColor = .systemGray6
+        textField.autocapitalizationType = .none
         textField.isSecureTextEntry = true
         return textField
     }()
@@ -190,7 +201,7 @@ class AddFamilyMemberViewController: UIViewController, UIImagePickerControllerDe
         button.titleLabel?.font = .systemFont(ofSize: 18, weight: .semibold)
         button.backgroundColor = UIColor.systemBlue.withAlphaComponent(0.2)
         button.setTitleColor(.systemBlue, for: .normal)
-        button.layer.cornerRadius = 12
+        button.layer.cornerRadius = Constants.CardSize.DefaultCardCornerRadius
         button.addTarget(self, action: #selector(addButtonTapped), for: .touchUpInside)
         return button
     }()

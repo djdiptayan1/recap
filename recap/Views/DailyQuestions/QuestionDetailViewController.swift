@@ -57,7 +57,7 @@ class QuestionDetailViewController: UIViewController {
         button.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)
         button.setTitleColor(.white, for: .normal)
         button.backgroundColor = UIColor.systemBlue
-        button.layer.cornerRadius = 10
+        button.layer.cornerRadius = Constants.CardSize.DefaultCardCornerRadius
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
@@ -188,7 +188,7 @@ class QuestionDetailViewController: UIViewController {
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16)
         button.setTitleColor(.black, for: .normal)
         button.backgroundColor = .white
-        button.layer.cornerRadius = 10
+        button.layer.cornerRadius = Constants.CardSize.DefaultCardCornerRadius
         button.layer.borderWidth = 1
         button.layer.borderColor = UIColor.lightGray.cgColor
         button.translatesAutoresizingMaskIntoConstraints = false

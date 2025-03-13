@@ -29,11 +29,11 @@ class LetsReadCardView: UIView {
     
     private func setupUI() {
         backgroundColor = .white
-        layer.cornerRadius = 16
-        layer.shadowColor = UIColor.black.cgColor
-        layer.shadowOpacity = 0.1
-        layer.shadowOffset = CGSize(width: 0, height: 2)
-        layer.shadowRadius = 4
+        layer.cornerRadius = Constants.CardSize.DefaultCardCornerRadius
+        layer.shadowColor = Constants.FontandColors.defaultshadowColor
+        layer.shadowOpacity = Float(Constants.FontandColors.defaultshadowOpacity)
+        layer.shadowOffset = Constants.FontandColors.defaultshadowOffset
+        layer.shadowRadius = Constants.FontandColors.defaultshadowRadius
         translatesAutoresizingMaskIntoConstraints = false
         
         // Icon Image
@@ -44,14 +44,14 @@ class LetsReadCardView: UIView {
         
         // Title Label
         titleLabel.text = "Let's Read"
-        titleLabel.font = UIFont.systemFont(ofSize: 24, weight: .semibold)
-        titleLabel.textColor = .black
+        titleLabel.font = Constants.FontandColors.titleFont
+        titleLabel.textColor = Constants.FontandColors.titleColor
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         addSubview(titleLabel)
         
         // Arrow Image
-        arrowImageView.image = UIImage(systemName: "chevron.right")
-        arrowImageView.tintColor = .systemGray
+        arrowImageView.image = UIImage(systemName: Constants.FontandColors.chevronName)
+        arrowImageView.tintColor = Constants.FontandColors.chevronColor
         arrowImageView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(arrowImageView)
         
@@ -77,8 +77,12 @@ class LetsReadCardView: UIView {
             iconImageView.heightAnchor.constraint(equalToConstant: 60),
             
             titleLabel.topAnchor.constraint(equalTo: topAnchor, constant: 24),
-            titleLabel.leadingAnchor.constraint(equalTo: iconImageView.trailingAnchor, constant: 16),
-            titleLabel.trailingAnchor.constraint(lessThanOrEqualTo: arrowImageView.leadingAnchor, constant: -8),
+            titleLabel.leadingAnchor.constraint(equalTo: iconImageView.trailingAnchor, constant: Constants
+                .paddingKeys
+                .DefaultPaddingLeft),
+            titleLabel.trailingAnchor.constraint(lessThanOrEqualTo: arrowImageView.leadingAnchor, constant: Constants
+                .paddingKeys
+                .DefaultPaddingRight),
             
             arrowImageView.centerYAnchor.constraint(equalTo: titleLabel.centerYAnchor),
             arrowImageView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -24),
@@ -86,13 +90,21 @@ class LetsReadCardView: UIView {
             arrowImageView.heightAnchor.constraint(equalToConstant: 22),
             
             separatorView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 12),
-            separatorView.leadingAnchor.constraint(equalTo: iconImageView.trailingAnchor, constant: 24),
-            separatorView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -24),
+            separatorView.leadingAnchor.constraint(equalTo: iconImageView.trailingAnchor, constant: Constants
+                .paddingKeys
+                .DefaultPaddingLeft),
+            separatorView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: Constants
+                .paddingKeys
+                .DefaultPaddingRight),
             separatorView.heightAnchor.constraint(equalToConstant: 1),
             
             descriptionLabel.topAnchor.constraint(equalTo: separatorView.bottomAnchor, constant: 12),
-            descriptionLabel.leadingAnchor.constraint(equalTo: iconImageView.trailingAnchor, constant: 24),
-            descriptionLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -24),
+            descriptionLabel.leadingAnchor.constraint(equalTo: iconImageView.trailingAnchor, constant: Constants
+                .paddingKeys
+                .DefaultPaddingLeft),
+            descriptionLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -Constants
+                .paddingKeys
+                .DefaultPaddingRight),
             descriptionLabel.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -24)
         ])
     }

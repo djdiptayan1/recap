@@ -85,7 +85,7 @@ class familyInfo: UIViewController {
         let button = UIButton()
         button.setTitle("Save", for: .normal)
         button.backgroundColor = .systemBlue
-        button.layer.cornerRadius = 8
+        button.layer.cornerRadius = Constants.CardSize.DefaultCardCornerRadius
         button.titleLabel?.font = .systemFont(ofSize: 17, weight: .semibold)
         return button
     }()

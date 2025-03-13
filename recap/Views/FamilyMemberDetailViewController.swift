@@ -142,7 +142,7 @@ class FamilyMemberDetailViewController: UIViewController {
         button.setTitle("Call \(member.name)", for: .normal)
         button.setTitleColor(.systemBlue, for: .normal)
         button.backgroundColor = UIColor.systemBlue.withAlphaComponent(0.2)
-        button.layer.cornerRadius = 10
+        button.layer.cornerRadius = Constants.CardSize.DefaultCardCornerRadius
         button.titleLabel?.font = UIFont.boldSystemFont(ofSize: 16)
         button.contentEdgeInsets = UIEdgeInsets(top: 10, left: 20, bottom: 10, right: 20)
         button.addTarget(self, action: #selector(callPhoneNumber), for: .touchUpInside)

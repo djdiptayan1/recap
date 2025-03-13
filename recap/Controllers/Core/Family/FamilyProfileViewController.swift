@@ -41,7 +41,7 @@ class FamilyProfileViewController: UIViewController, UITableViewDelegate, UITabl
         button.titleLabel?.font = .boldSystemFont(ofSize: 17)
         button.backgroundColor = .systemRed
         button.setTitleColor(.white, for: .normal)
-        button.layer.cornerRadius = 8
+        button.layer.cornerRadius = Constants.CardSize.DefaultCardCornerRadius
         button.clipsToBounds = true
         button.addTarget(self, action: #selector(logoutTapped), for: .touchUpInside)
         return button
@@ -114,7 +114,7 @@ class FamilyProfileViewController: UIViewController, UITableViewDelegate, UITabl
         ])
 
         profileImageView.layer.cornerRadius = 60
-        tableView.layer.cornerRadius = 10
+        tableView.layer.cornerRadius = Constants.CardSize.DefaultCardCornerRadius
         tableView.clipsToBounds = true
     }
 

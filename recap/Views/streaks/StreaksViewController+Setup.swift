@@ -41,7 +41,7 @@ extension StreaksViewController {
     
     // MARK: - Setup Navigation Bar
     func setupNavBar() {
-        title = "Streaks"
+        title = "Daily Checker"
     }
     
     // MARK: - Setup Streak Stats View
@@ -103,7 +103,7 @@ extension StreaksViewController {
     // Method to set up the streak stats view
     func setupStreakStatsView() {
         streakStatsView.backgroundColor = .white
-        streakStatsView.layer.cornerRadius = 12
+        streakStatsView.layer.cornerRadius = Constants.CardSize.DefaultCardCornerRadius
         streakStatsView.layer.shadowColor = UIColor.black.cgColor
         streakStatsView.layer.shadowOpacity = 0.1
         streakStatsView.layer.shadowOffset = CGSize(width: 0, height: 2)
@@ -113,7 +113,7 @@ extension StreaksViewController {
 
         // Create the info button
         let infoButton = UIButton()
-        infoButton.setTitle("?", for: .normal)
+        infoButton.setTitle("i", for: .normal)
         infoButton.titleLabel?.font = UIFont.boldSystemFont(ofSize: 12) // Smaller font
         infoButton.setTitleColor(.white, for: .normal)
         infoButton.backgroundColor = .systemOrange
@@ -171,25 +171,42 @@ extension StreaksViewController {
         // Create a card view to show the descriptions
         let infoCard = UIView()
         infoCard.backgroundColor = .white
-        infoCard.layer.cornerRadius = 12
+        infoCard.layer.cornerRadius = Constants.CardSize.DefaultCardCornerRadius
         infoCard.layer.shadowColor = UIColor.black.cgColor
         infoCard.layer.shadowOpacity = 0.1
-        infoCard.layer.shadowOffset = CGSize(width: 0, height: 2)
-        infoCard.layer.shadowRadius = 4
+        infoCard.layer.shadowOffset = CGSize(width: 0, height: 4)
+        infoCard.layer.shadowRadius = 8
         infoCard.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(infoCard)
+
+        // Add a close button
+        let closeButton = UIButton(type: .system)
+        closeButton.setImage(UIImage(systemName: "xmark.circle.fill"), for: .normal)
+        closeButton.tintColor = .gray
+        closeButton.translatesAutoresizingMaskIntoConstraints = false
+        closeButton.addTarget(self, action: #selector(dismissInfoCard), for: .touchUpInside)
+        infoCard.addSubview(closeButton)
+
+        // Add a title label
+        let titleLabel = UILabel()
+        titleLabel.text = "Streak Information"
+        titleLabel.font = UIFont.boldSystemFont(ofSize: 20)
+        titleLabel.textAlignment = .center
+        titleLabel.translatesAutoresizingMaskIntoConstraints = false
+        infoCard.addSubview(titleLabel)
 
         // Add a label with the explanation text
         let infoLabel = UILabel()
         infoLabel.numberOfLines = 0
         infoLabel.text = """
-        - Max Streak: The longest streak you've ever achieved without a break. This includes the max days you answered questions consecutively.
-        - Current Streak: The consecutive days your current streak is going on.
-        - Active Days: The number of days you answered a question since you downloaded the app.
+        • Max Streak: The longest streak you've ever achieved without a break.
+
+        • Current Streak: The consecutive days your current streak is going on.
+
+        • Active Days: The number of days you answered a question since you downloaded the app.
         """
         infoLabel.font = UIFont.systemFont(ofSize: 16)
-        infoLabel.textColor = .black
-        infoLabel.textAlignment = .center
+        infoLabel.textColor = .darkGray
         infoLabel.translatesAutoresizingMaskIntoConstraints = false
         infoCard.addSubview(infoLabel)
 
@@ -197,26 +214,60 @@ extension StreaksViewController {
         NSLayoutConstraint.activate([
             infoCard.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             infoCard.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-            infoCard.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.8),
-            infoCard.heightAnchor.constraint(equalToConstant: 180),
+            infoCard.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.85),
+            infoCard.heightAnchor.constraint(equalToConstant: 280),
 
-            infoLabel.leadingAnchor.constraint(equalTo: infoCard.leadingAnchor, constant: 16),
-            infoLabel.trailingAnchor.constraint(equalTo: infoCard.trailingAnchor, constant: -16),
-            infoLabel.centerYAnchor.constraint(equalTo: infoCard.centerYAnchor)
+            closeButton.topAnchor.constraint(equalTo: infoCard.topAnchor, constant: 16),
+            closeButton.trailingAnchor.constraint(equalTo: infoCard.trailingAnchor, constant: -16),
+            closeButton.widthAnchor.constraint(equalToConstant: 30),
+            closeButton.heightAnchor.constraint(equalToConstant: 30),
+
+            titleLabel.topAnchor.constraint(equalTo: infoCard.topAnchor, constant: 24),
+            titleLabel.leadingAnchor.constraint(equalTo: infoCard.leadingAnchor, constant: 16),
+            titleLabel.trailingAnchor.constraint(equalTo: infoCard.trailingAnchor, constant: -16),
+
+            infoLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 16),
+            infoLabel.leadingAnchor.constraint(equalTo: infoCard.leadingAnchor, constant: 24),
+            infoLabel.trailingAnchor.constraint(equalTo: infoCard.trailingAnchor, constant: -24),
+            infoLabel.bottomAnchor.constraint(equalTo: infoCard.bottomAnchor, constant: -24)
         ])
 
-        // Add a tap gesture recognizer to dismiss the card when tapped
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissInfoCard))
-        infoCard.addGestureRecognizer(tapGesture)
+        // Add a blurred background
+        let blurEffect = UIBlurEffect(style: .dark)
+        let blurredView = UIVisualEffectView(effect: blurEffect)
+        blurredView.frame = view.bounds
+        blurredView.alpha = 0.5
+        view.insertSubview(blurredView, belowSubview: infoCard)
+
+        // Animate the appearance of the info card
+        infoCard.transform = CGAffineTransform(scaleX: 0.8, y: 0.8)
+        infoCard.alpha = 0
+
+        UIView.animate(withDuration: 0.3) {
+            infoCard.transform = .identity
+            infoCard.alpha = 1
+        }
     }
+
 
     // Method to dismiss the info card
     @objc func dismissInfoCard() {
-        // Remove the info card from the view
-        if let infoCard = view.subviews.last(where: { $0 is UIView && $0.backgroundColor == .white }) {
-            infoCard.removeFromSuperview()
+        if let infoCard = view.subviews.last(where: { $0 is UIView && $0.layer.cornerRadius == Constants.CardSize.DefaultCardCornerRadius }) {
+            UIView.animate(withDuration: 0.3, animations: {
+                infoCard.transform = CGAffineTransform(scaleX: 0.8, y: 0.8)
+                infoCard.alpha = 0
+                if let blurredView = self.view.subviews.first(where: { $0 is UIVisualEffectView }) {
+                    blurredView.alpha = 0
+                }
+            }) { _ in
+                infoCard.removeFromSuperview()
+                if let blurredView = self.view.subviews.first(where: { $0 is UIVisualEffectView }) {
+                    blurredView.removeFromSuperview()
+                }
+            }
         }
     }
+
     // Method to create a custom stat view with a title and value label
     func createStatView(title: String, value: String) -> (UIView, UILabel) {
         let statView = UIView()
@@ -261,7 +312,7 @@ extension StreaksViewController {
     // Method to set up the header view with the "This Week" heading and current dates
     func setupHeaderView() {
         headerView.backgroundColor = .white
-        headerView.layer.cornerRadius = 12
+        headerView.layer.cornerRadius = Constants.CardSize.DefaultCardCornerRadius
         headerView.layer.shadowColor = UIColor.black.cgColor
         headerView.layer.shadowOpacity = 0.1
         headerView.layer.shadowOffset = CGSize(width: 0, height: 2)
@@ -463,7 +514,7 @@ extension StreaksViewController {
     func setupCalendarView() {
         // Calendar View setup
         calendarView.backgroundColor = .white
-        calendarView.layer.cornerRadius = 12
+        calendarView.layer.cornerRadius = Constants.CardSize.DefaultCardCornerRadius
         calendarView.layer.shadowColor = UIColor.black.cgColor
         calendarView.layer.shadowOpacity = 0.1
         calendarView.layer.shadowOffset = CGSize(width: 0, height: 2)

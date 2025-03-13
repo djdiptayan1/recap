@@ -50,9 +50,14 @@ class patientInfo: UIViewController {
     private let saveButton: UIButton = {
         let button = UIButton()
         button.setTitle("Save", for: .normal)
-        button.backgroundColor = .systemBlue
-        button.layer.cornerRadius = 8
-        button.titleLabel?.font = .systemFont(ofSize: 17, weight: .semibold)
+        button.backgroundColor = Constants.ButtonStyle.DefaultButtonBackgroundColor
+        button.layer.cornerRadius = Constants.CardSize.DefaultCardCornerRadius
+        button.titleLabel?.font = Constants.ButtonStyle.DefaultButtonFont
+        button
+            .setTitleColor(
+                Constants.ButtonStyle.DefaultButtonTextColor,
+                for: .normal
+            )
         return button
     }()
 
@@ -368,7 +373,7 @@ class CustomTextField: UITextField {
 
     private func setup() {
         backgroundColor = .systemGray6
-        layer.cornerRadius = 8
+        layer.cornerRadius = Constants.CardSize.DefaultCardCornerRadius
         leftView = UIView(frame: CGRect(x: 0, y: 0, width: 12, height: 1))
         leftViewMode = .always
         heightAnchor.constraint(equalToConstant: 44).isActive = true

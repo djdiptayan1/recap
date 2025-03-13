@@ -36,7 +36,7 @@ class GeoSorterViewController: UIViewController {
     private let wordsContainer: UIView = {
         let view = UIView()
         view.backgroundColor = .white
-        view.layer.cornerRadius = 16
+        view.layer.cornerRadius = Constants.CardSize.DefaultCardCornerRadius
         view.layer.shadowColor = UIColor.black.cgColor
         view.layer.shadowOpacity = 0.1
         view.layer.shadowOffset = CGSize(width: 0, height: 2)
@@ -57,7 +57,7 @@ class GeoSorterViewController: UIViewController {
         super.viewDidLoad()
         title = "Word Game"
         view.backgroundColor = .systemBackground
-        applyGradientBackground()
+//        applyGradientBackground()
         setupUI()
         populateWords()
     }
@@ -172,7 +172,7 @@ class GeoSorterViewController: UIViewController {
         label.font = .systemFont(ofSize: 16, weight: .semibold)
         label.textAlignment = .center
         label.backgroundColor = .systemIndigo.withAlphaComponent(0.1)
-        label.layer.cornerRadius = 12
+        label.layer.cornerRadius = Constants.CardSize.DefaultCardCornerRadius
         label.layer.borderWidth = 1.5
         label.layer.borderColor = UIColor.systemIndigo.cgColor
         label.layer.masksToBounds = true
@@ -311,7 +311,7 @@ class GeoSorterViewController: UIViewController {
     private func createCategoryContainer(title: String) -> UIView {
         let container = UIView()
         container.backgroundColor = .systemGray6
-        container.layer.cornerRadius = 12
+        container.layer.cornerRadius = Constants.CardSize.DefaultCardCornerRadius
         container.layer.borderColor = UIColor.systemGray4.cgColor
         container.layer.borderWidth = 1
 
@@ -336,7 +336,7 @@ class GeoSorterViewController: UIViewController {
             for _ in 0..<4 { // Four columns
                 let placeholderLabel = UILabel()
                 placeholderLabel.backgroundColor = .white
-                placeholderLabel.layer.cornerRadius = 8
+                placeholderLabel.layer.cornerRadius = Constants.CardSize.DefaultCardCornerRadius
                 placeholderLabel.clipsToBounds = true
                 rowStack.addArrangedSubview(placeholderLabel)
             }

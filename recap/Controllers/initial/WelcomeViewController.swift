@@ -30,7 +30,7 @@ class WelcomeViewController: UIViewController {
         button.setTitle("Patient", for: .normal)
         button.setTitleColor(.systemBlue, for: .normal)
         button.backgroundColor = .systemBlue.withAlphaComponent(0.1)
-        button.layer.cornerRadius = 12
+        button.layer.cornerRadius = Constants.CardSize.DefaultCardCornerRadius
         button.titleLabel?.font = .systemFont(ofSize: 17, weight: .semibold)
         return button
     }()
@@ -40,7 +40,7 @@ class WelcomeViewController: UIViewController {
         button.setTitle("Family", for: .normal)
         button.setTitleColor(.systemBlue, for: .normal)
         button.backgroundColor = .systemBlue.withAlphaComponent(0.1)
-        button.layer.cornerRadius = 12
+        button.layer.cornerRadius = Constants.CardSize.DefaultCardCornerRadius
         button.titleLabel?.font = .systemFont(ofSize: 17, weight: .semibold)
         return button
     }()
@@ -48,7 +48,7 @@ class WelcomeViewController: UIViewController {
     private let containerView: UIView = {
         let view = UIView()
         view.backgroundColor = .systemBackground
-        view.layer.cornerRadius = 20
+        view.layer.cornerRadius = Constants.CardSize.DefaultCardCornerRadius
         // Add shadow
         view.layer.shadowColor = UIColor.black.cgColor
         view.layer.shadowOffset = CGSize(width: 0, height: 2)

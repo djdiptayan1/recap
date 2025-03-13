@@ -11,7 +11,7 @@ class CategoryStackView: UIStackView {
     let containerView: UIView = {
         let view = UIView()
         view.backgroundColor = .systemGray6
-        view.layer.cornerRadius = 12
+        view.layer.cornerRadius = Constants.CardSize.DefaultCardCornerRadius
         return view
     }()
     
@@ -69,7 +69,7 @@ class CategoryStackView: UIStackView {
         label.font = .systemFont(ofSize: 15, weight: .medium)
         label.textAlignment = .center
         label.backgroundColor = .systemGreen.withAlphaComponent(0.2)
-        label.layer.cornerRadius = 8
+        label.layer.cornerRadius = Constants.CardSize.DefaultCardCornerRadius
         label.layer.masksToBounds = true
         label.layoutMargins = UIEdgeInsets(top: 4, left: 8, bottom: 4, right: 8)
         

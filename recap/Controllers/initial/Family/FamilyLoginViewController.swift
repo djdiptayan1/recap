@@ -41,8 +41,8 @@ class FamilyLoginViewController: UIViewController {
     let verifyButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Verify", for: .normal)
-        button.backgroundColor = .systemBlue.withAlphaComponent(0.2)
-        button.setTitleColor(.systemBlue, for: .normal)
+        button.backgroundColor = .systemBlue.withAlphaComponent(0.5)
+        button.setTitleColor(.white, for: .normal)
         button.layer.cornerRadius = 12
         button.titleLabel?.font = .systemFont(ofSize: 16, weight: .bold)
         return button
@@ -204,4 +204,4 @@ class FamilyLoginViewController: UIViewController {
 //    }
 }
 
-#Preview { FamilyLoginViewController() }
+#Preview { FamilyLoginViewController() } 

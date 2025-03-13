@@ -18,7 +18,7 @@ extension FamilyLoginViewController {
         // Animate the verify button to indicate processing
         let spinner = UIActivityIndicatorView(style: .medium)
         spinner.startAnimating()
-        spinner.color = .systemBlue
+        spinner.color = .white
         verifyButton.setTitle("", for: .normal)
         verifyButton.addSubview(spinner)
         spinner.center = CGPoint(x: verifyButton.bounds.midX, y: verifyButton.bounds.midY)
@@ -66,7 +66,7 @@ extension FamilyLoginViewController {
                     // Button success animation
                     UIView.animate(withDuration: 0.3) {
                         self.verifyButton.setTitle("Verified", for: .normal)
-                        self.verifyButton.backgroundColor = .systemGreen
+                        self.verifyButton.backgroundColor = .systemGreen.withAlphaComponent(0.7)
                     }
 
                     patientUIDFound = true

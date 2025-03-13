@@ -13,16 +13,17 @@ class StreakCardView: UIView {
 
     private let streaksLabel: UILabel = {
         let label = UILabel()
-        label.text = "Streaks 🔥"
-        label.font = UIFont.systemFont(ofSize: 24, weight: .semibold)
+        label.text = "Daily Checker 🧠"
+        label.font = Constants.FontandColors.titleFont
+        label.textColor = Constants.FontandColors.titleColor
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
 
     private let arrowImageView: UIImageView = {
         let imageView = UIImageView()
-        imageView.image = UIImage(systemName: "chevron.right")
-        imageView.tintColor = .black
+        imageView.image = UIImage(systemName: Constants.FontandColors.chevronName)
+        imageView.tintColor = Constants.FontandColors.chevronColor
         imageView.translatesAutoresizingMaskIntoConstraints = false
         return imageView
     }()
@@ -66,16 +67,16 @@ class StreakCardView: UIView {
         super.didMoveToWindow()
         fetchStreakData()
     }
-
-
     
     private func setupUI() {
         backgroundColor = .white
-        layer.cornerRadius = 12
+        layer.cornerRadius = Constants.CardSize.DefaultCardCornerRadius
         layer.shadowColor = UIColor.systemOrange.cgColor
-        layer.shadowOpacity = 0.1
-        layer.shadowOffset = CGSize(width: 0, height: 2)
-        layer.shadowRadius = 4
+        layer.shadowOpacity = Float(
+            Constants.FontandColors.defaultshadowOpacity
+        )
+        layer.shadowOffset = Constants.FontandColors.defaultshadowOffset
+        layer.shadowRadius = Constants.FontandColors.defaultshadowRadius
 
         addSubview(streaksLabel)
         addSubview(arrowImageView)

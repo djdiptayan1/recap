@@ -31,7 +31,7 @@ class DailyQuestionCardView: UIView {
     
     private func setupUI() {
         backgroundColor = .white
-        layer.cornerRadius = 16
+        layer.cornerRadius = Constants.CardSize.DefaultCardCornerRadius
         layer.shadowColor = UIColor.black.cgColor
         layer.shadowOpacity = 0.1
         layer.shadowOffset = CGSize(width: 0, height: 2)

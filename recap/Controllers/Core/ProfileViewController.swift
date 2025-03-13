@@ -53,7 +53,7 @@ class ProfileViewController: UIViewController {
     private let nameLabel: UILabel = {
         let label = UILabel()
         label.text = "Diptayan Jash"
-        label.font = .systemFont(ofSize: 20, weight: .semibold)
+        label.font = Constants.FontandColors.titleFont
         label.textAlignment = .center
         return label
     }()
@@ -267,18 +267,26 @@ extension ProfileViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         
-        if indexPath.section == 1 && indexPath.row == 0 {
+        if indexPath.section == 0 && indexPath.row == 2 { // UID row
+            if let details = UserDefaultsStorageProfile.shared.getProfile(),
+               let uid = details["patientUID"] as? String {
+                UIPasteboard.general.string = uid
+                showCopyConfirmation()
+            }
+        } else if indexPath.section == 1 && indexPath.row == 0 {
             // Memory Check cell tapped
             let memoryCheckVC = MemoryCheckViewController()
-            
-            // Pass the pre-fetched questions
             memoryCheckVC.preloadedQuestions = prefetchedQuestions
-            
             navigationController?.pushViewController(memoryCheckVC, animated: true)
         } else if indexPath.section == 2 {
             let loginVC = PatientLoginViewController()
             loginVC.logoutTapped()
         }
+    }
+    private func showCopyConfirmation() {
+        let alert = UIAlertController(title: "Copied!", message: "Patient UID copied to clipboard.", preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+        present(alert, animated: true)
     }
     
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {

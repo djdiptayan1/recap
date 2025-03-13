@@ -23,11 +23,19 @@ class AboutAppViewController: UIViewController {
         return contentView
     }()
     
+//    private let headerView: UIView = {
+//        let view = UIView()
+//        view.translatesAutoresizingMaskIntoConstraints = false
+//        view.backgroundColor = .systemBlue.withAlphaComponent(0.1)
+//        view.layer.cornerRadius = 16
+//        return view
+//    }()
     private let headerView: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
         view.backgroundColor = .systemBlue.withAlphaComponent(0.1)
-        view.layer.cornerRadius = 16
+        view.layer.cornerRadius = 25
+        view.layer.maskedCorners = [.layerMaxXMaxYCorner, .layerMinXMaxYCorner]
         return view
     }()
     
@@ -84,7 +92,7 @@ class AboutAppViewController: UIViewController {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
         view.backgroundColor = .secondarySystemBackground
-        view.layer.cornerRadius = 16
+        view.layer.cornerRadius = Constants.CardSize.DefaultCardCornerRadius
         return view
     }()
     
@@ -240,9 +248,10 @@ class AboutAppViewController: UIViewController {
             contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
             contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
             
-            headerView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 16),
-            headerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            headerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            headerView.topAnchor.constraint(equalTo: contentView.topAnchor),
+            headerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            headerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            headerView.heightAnchor.constraint(equalToConstant: 260),
             
             appIconImageView.topAnchor.constraint(equalTo: headerView.topAnchor, constant: 24),
             appIconImageView.centerXAnchor.constraint(equalTo: headerView.centerXAnchor),

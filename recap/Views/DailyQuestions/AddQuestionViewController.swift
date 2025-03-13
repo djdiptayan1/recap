@@ -19,7 +19,7 @@ class AddQuestionViewController: UIViewController, UIImagePickerControllerDelega
         button.setTitle("Select Category", for: .normal)
         button.setTitleColor(.white, for: .normal)
         button.backgroundColor = .systemBlue
-        button.layer.cornerRadius = 10
+        button.layer.cornerRadius = Constants.CardSize.DefaultCardCornerRadius
         button.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
@@ -30,7 +30,7 @@ class AddQuestionViewController: UIViewController, UIImagePickerControllerDelega
         button.setTitle("Select Time Frame", for: .normal)
         button.setTitleColor(.white, for: .normal)
         button.backgroundColor = .systemBlue
-        button.layer.cornerRadius = 10
+        button.layer.cornerRadius = Constants.CardSize.DefaultCardCornerRadius
         button.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
@@ -40,7 +40,7 @@ class AddQuestionViewController: UIViewController, UIImagePickerControllerDelega
         let textField = UITextField()
         textField.placeholder = "What did you eat?"
         textField.backgroundColor = UIColor.systemGray6
-        textField.layer.cornerRadius = 10
+        textField.layer.cornerRadius = Constants.CardSize.DefaultCardCornerRadius
         textField.textAlignment = .center
         textField.font = UIFont.systemFont(ofSize: 26)
         textField.translatesAutoresizingMaskIntoConstraints = false
@@ -52,7 +52,7 @@ class AddQuestionViewController: UIViewController, UIImagePickerControllerDelega
         imageView.contentMode = .scaleAspectFill
         imageView.clipsToBounds = true
         imageView.backgroundColor = UIColor.systemGray5
-        imageView.layer.cornerRadius = 10
+        imageView.layer.cornerRadius = Constants.CardSize.DefaultCardCornerRadius
         imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.isHidden = true
         return imageView
@@ -71,7 +71,7 @@ class AddQuestionViewController: UIViewController, UIImagePickerControllerDelega
         button.setImage(UIImage(systemName: "xmark.circle"), for: .normal)
         button.tintColor = .red // Red cross
         button.backgroundColor = .white // White background
-        button.layer.cornerRadius = 12 // Round button
+        button.layer.cornerRadius = Constants.CardSize.DefaultCardCornerRadius // Round button
 
         button.translatesAutoresizingMaskIntoConstraints = false
         button.isHidden = true
@@ -85,7 +85,7 @@ class AddQuestionViewController: UIViewController, UIImagePickerControllerDelega
             let textField = UITextField()
             textField.placeholder = "Option \(i)"
             textField.backgroundColor = UIColor.systemGray6
-            textField.layer.cornerRadius = 10
+            textField.layer.cornerRadius = Constants.CardSize.DefaultCardCornerRadius
             textField.font = UIFont.systemFont(ofSize: 20)
             textField.translatesAutoresizingMaskIntoConstraints = false
             textFields.append(textField)
@@ -98,7 +98,7 @@ class AddQuestionViewController: UIViewController, UIImagePickerControllerDelega
         button.setTitle("Save", for: .normal)
         button.backgroundColor = UIColor.systemBlue
         button.setTitleColor(.white, for: .normal)
-        button.layer.cornerRadius = 10
+        button.layer.cornerRadius = Constants.CardSize.DefaultCardCornerRadius
         button.titleLabel?.font = UIFont.boldSystemFont(ofSize: 22)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button

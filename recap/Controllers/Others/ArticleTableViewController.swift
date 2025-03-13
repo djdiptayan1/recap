@@ -26,6 +26,12 @@ class ArticleTableViewController: UITableViewController {
         setupUI()
         fetchArticles()
     }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        // Apply background color when view appears
+        applyBackgroundColor()
+    }
 
     private func setupUI() {
         title = "Articles"
@@ -34,6 +40,34 @@ class ArticleTableViewController: UITableViewController {
         tableView.separatorStyle = .none
         tableView.rowHeight = UITableView.automaticDimension
         tableView.estimatedRowHeight = 317
+        
+        // Apply background color immediately
+        applyBackgroundColor()
+    }
+    
+    private func applyBackgroundColor() {
+        if traitCollection.userInterfaceStyle == .light {
+            // Subtle grey background for light mode (similar to Apple Health)
+            let healthAppGrey = Constants.BGs.GreyBG
+            
+            // Apply to table view directly
+            tableView.backgroundColor = healthAppGrey
+            
+            // Also apply to parent view to ensure complete coverage
+            view.backgroundColor = healthAppGrey
+        } else {
+            // Default dark mode background
+            tableView.backgroundColor = .systemBackground
+            view.backgroundColor = .systemBackground
+        }
+    }
+    
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        
+        if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
+            applyBackgroundColor()
+        }
     }
 
     private func fetchArticles() {
@@ -97,8 +131,14 @@ class ArticleTableViewController: UITableViewController {
         ) as? ArticleTableViewCell else {
             return UITableViewCell()
         }
+        
         cell.configure(with: articles[indexPath.row])
         cell.selectionStyle = .none
+        
+        // Ensure cell background is transparent to show table view background
+        cell.backgroundColor = .clear
+        cell.contentView.backgroundColor = .clear
+        
         return cell
     }
 
@@ -106,6 +146,5 @@ class ArticleTableViewController: UITableViewController {
         let article = articles[indexPath.row]
         let detailVC = ArticleDetailViewController(article: article)
         navigationController?.pushViewController(detailVC, animated: true)
-        tableView.backgroundColor = .clear
     }
 }

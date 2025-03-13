@@ -83,7 +83,7 @@ class launchScreenViewController: UIViewController {
                         "customHeight"
                     ),
                     resolver: { _ in
-                        return UIScreen.main.bounds.height * 0.80
+                        return UIScreen.main.bounds.height * 0.83
                     })]
                 sheet.prefersGrabberVisible = true
                 sheet.prefersEdgeAttachedInCompactHeight = true

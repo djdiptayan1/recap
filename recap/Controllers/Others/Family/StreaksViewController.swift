@@ -50,7 +50,7 @@ class StreaksViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        view.backgroundColor = Constants.BGs.GreyBG
         let currentDate = Date()
         let calendar = Calendar.current
         let currentComponents = calendar.dateComponents([.year, .month], from: currentDate)
@@ -59,7 +59,7 @@ class StreaksViewController: UIViewController {
         currentMonth = currentComponents.month!
         
         view.backgroundColor = .white
-        setupGradientBackground()
+//        setupGradientBackground()
         setupNavBar()
         setupProfileView()
 //        setupStreakStatsView()

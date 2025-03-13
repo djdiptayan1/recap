@@ -6,7 +6,7 @@ class QuestionCell: UITableViewCell {
     private let containerView: UIView = {
         let view = UIView()
         view.backgroundColor = .systemBackground
-        view.layer.cornerRadius = 12
+        view.layer.cornerRadius = Constants.CardSize.DefaultCardCornerRadius
         view.layer.shadowColor = UIColor.black.cgColor
         view.layer.shadowOpacity = 0.1
         view.layer.shadowOffset = CGSize(width: 0, height: 2)
@@ -17,7 +17,7 @@ class QuestionCell: UITableViewCell {
     private let iconContainer: UIView = {
         let view = UIView()
         view.backgroundColor = .systemGreen.withAlphaComponent(0.1)
-        view.layer.cornerRadius = 22
+        view.layer.cornerRadius = Constants.CardSize.DefaultCardCornerRadius
         return view
     }()
     

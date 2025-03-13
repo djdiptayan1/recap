@@ -41,8 +41,14 @@ class TabbarFamilyViewController: UITabBarController, UITabBarControllerDelegate
         tabBar.tintColor = .label
         setViewControllers([nav1, nav2], animated: true)
         
-        analyticsService = CoreAnalyticsService(verifiedUserDocID: Constants.UserDefaultsKeys.verifiedUserDocID)
-        analyticsService?.initializeAnalytics()
+
+        if let verifiedUserDocID = UserDefaults.standard.string(forKey: Constants.UserDefaultsKeys.verifiedUserDocID) {
+
+            analyticsService = CoreAnalyticsService(verifiedUserDocID: verifiedUserDocID) // ✅ Use the actual value
+
+            analyticsService?.initializeAnalytics()
+
+        }
         
         // Track when the app is opened by family
         analyticsService?.trackAppOpen(isFamily: true)

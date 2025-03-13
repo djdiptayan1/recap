@@ -10,6 +10,7 @@ import FirebaseCore
 import FirebaseFirestore
 import GoogleSignIn
 import UIKit
+import Lottie
 
 extension PatientLoginViewController {
 //    @objc func rememberMeTapped() {
@@ -81,10 +82,19 @@ extension PatientLoginViewController {
         let config = GIDConfiguration(clientID: clientID)
         GIDSignIn.sharedInstance.configuration = config
 
+        // Show loading animation immediately before presenting Google Sign-In
+        let loadingAnimation = self.showLoadingAnimation()
+        loadingAnimation.isHidden = true // Initially hide it
+
         GIDSignIn.sharedInstance.signIn(withPresenting: self) { [weak self] result, error in
             guard let self = self else { return }
 
+            // Make the loading animation visible once Google Sign-In screen dismisses
+            loadingAnimation.isHidden = false
+
             if let error = error {
+                // Remove loading animation if there's an error
+                self.removeLoadingAnimation(loadingAnimation)
                 print("Google Sign-In Error: \(error.localizedDescription)")
                 self.showAlert(message: "Google Sign-In failed. Please try again.")
                 return
@@ -92,6 +102,8 @@ extension PatientLoginViewController {
 
             guard let user = result?.user,
                   let idToken = user.idToken?.tokenString else {
+                // Remove loading animation if user retrieval fails
+                self.removeLoadingAnimation(loadingAnimation)
                 print("Failed to retrieve Google user")
                 self.showAlert(message: "Unable to retrieve user information.")
                 return
@@ -103,23 +115,27 @@ extension PatientLoginViewController {
                 guard let self = self else { return }
 
                 if let authError = authError {
+                    // Remove loading animation if there's an authentication error
+                    self.removeLoadingAnimation(loadingAnimation)
                     print("Firebase Authentication Error: \(authError.localizedDescription)")
                     self.showAlert(message: "Authentication failed. Please try again.")
                     return
                 }
 
                 guard let firebaseUser = authResult?.user else {
+                    // Remove loading animation if no user is found
+                    self.removeLoadingAnimation(loadingAnimation)
                     self.showAlert(message: "Login unsuccessful. Please try again.")
                     return
                 }
 
                 let userId = firebaseUser.uid
-                self.fetchOrCreateUserProfile(userId: userId, email: firebaseUser.email ?? "")
+                self.fetchOrCreateUserProfile(userId: userId, email: firebaseUser.email ?? "", loadingAnimation: loadingAnimation)
             }
         }
     }
 
-    private func fetchOrCreateUserProfile(userId: String, email: String) {
+    private func fetchOrCreateUserProfile(userId: String, email: String, loadingAnimation: LottieAnimationView) {
         UserDefaults.standard
             .set(true, forKey: Constants.UserDefaultsKeys.isPatientLoggedIn)
         UserDefaults.standard.synchronize()
@@ -129,6 +145,7 @@ extension PatientLoginViewController {
             guard let self = self else { return }
 
             if let error = error {
+                self.removeLoadingAnimation(loadingAnimation)
                 print("Error fetching user profile: \(error.localizedDescription)")
                 self.showAlert(message: "Failed to fetch user profile.")
                 return
@@ -137,12 +154,14 @@ extension PatientLoginViewController {
             if let document = document, document.exists {
                 // Existing user profile found, navigate to main view
                 print("User profile fetched successfully")
+                self.removeLoadingAnimation(loadingAnimation)
                 let tabBarVC = TabbarViewController()
                 self.navigationController?.setViewControllers([tabBarVC], animated: true)
             } else {
                 // New user, generate unique patient ID and save profile
                 generateUniquePatientID { patientUID in
                     guard let patientUID = patientUID else {
+                        self.removeLoadingAnimation(loadingAnimation)
                         print("Failed to generate unique Patient ID.")
                         self.showAlert(message: "Unable to create profile. Please try again.")
                         return
@@ -166,10 +185,12 @@ extension PatientLoginViewController {
                     // Save the initial user profile to Firestore
                     db.collection("users").document(userId).setData(initialData) { error in
                         if let error = error {
+                            self.removeLoadingAnimation(loadingAnimation)
                             print("Error saving initial user profile: \(error.localizedDescription)")
                             self.showAlert(message: "Failed to create profile. Please try again.")
                         } else {
                             print("New user profile created successfully")
+                            self.removeLoadingAnimation(loadingAnimation)
                             let patientInfoVC = patientInfo()
                             let nav = UINavigationController(rootViewController: patientInfoVC)
                             self.present(nav, animated: true)
