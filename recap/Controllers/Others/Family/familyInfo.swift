@@ -102,9 +102,6 @@ class familyInfo: UIViewController {
         title = "Add Family Member"
         super.viewDidLoad()
         setupUI()
-//        setupImagePicker()
-//        setupPickers()
-//        setupTextFields()
     }
 
     private func setupUI() {
@@ -135,14 +132,10 @@ class familyInfo: UIViewController {
             saveButton.heightAnchor.constraint(equalToConstant: 50),
         ])
 
-//        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(profileImageTapped))
-//        profileImageView.addGestureRecognizer(tapGesture)
-
         saveButton.addTarget(self, action: #selector(saveButtonTapped), for: .touchUpInside)
     }
 
     @objc private func saveButtonTapped() {
-        // Validate inputs
         guard let firstName = firstNameField.text, !firstName.isEmpty,
               let lastName = lastNameField.text, !lastName.isEmpty,
               let dob = dobField.text, !dob.isEmpty,
@@ -157,12 +150,7 @@ class familyInfo: UIViewController {
             return
         }
 
-        let familyMemberDetails = FamilyMemberDetails(firstName: firstName,
-                                                     lastName: lastName,
-                                                     dateOfBirth: dob,
-                                                     relationship: relationship,
-                                                     bloodGroup: bloodGroup,
-                                                     id: userId)
+        let familyMemberDetails = FamilyMemberDetails(firstName: firstName, lastName: lastName, dateOfBirth: dob, relationship: relationship, bloodGroup: bloodGroup, id: userId)
 
         // Save to UserDefaults
         UserDefaultsStorageProfile.shared.saveProfile(
@@ -170,7 +158,6 @@ class familyInfo: UIViewController {
             image: profileImageView.image
         ) { [weak self] success in
             if success {
-                // Notify delegate and pop the view
                 self?.delegate?.didSaveFamilyMember(familyMemberDetails)
                 self?.navigationController?.popViewController(animated: true)
             } else {

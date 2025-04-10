@@ -2,7 +2,7 @@
 //  FamilyProfileViewController.swift
 //  recap
 //
-//  Created by admin70 on 11/11/24.
+//  Created by khushi on 11/11/24.
 //
 
 import UIKit
@@ -21,7 +21,7 @@ class FamilyProfileViewController: UIViewController, UITableViewDelegate, UITabl
 
     private let nameLabel: UILabel = {
         let label = UILabel()
-        label.text = "Diptayan Jash"
+        label.text = "Unknown Family"
         label.font = .systemFont(ofSize: 24, weight: .semibold)
         label.textAlignment = .center
         return label
@@ -30,8 +30,8 @@ class FamilyProfileViewController: UIViewController, UITableViewDelegate, UITabl
     private let tableView: UITableView = {
         let tableView = UITableView(frame: .zero, style: .grouped)
         tableView.translatesAutoresizingMaskIntoConstraints = false
-        tableView.backgroundColor = .white // Set background color to white
-        tableView.isScrollEnabled = false // Disable scrolling to keep content fixed
+        tableView.backgroundColor = .white
+        tableView.isScrollEnabled = false
         return tableView
     }()
 
@@ -54,17 +54,7 @@ class FamilyProfileViewController: UIViewController, UITableViewDelegate, UITabl
         setupNavigationBar()
         setupUI()
         setupTableView()
-        // Load stored family member details
-           if let familyMemberData = UserDefaults.standard.dictionary(forKey: Constants.UserDefaultsKeys.familyMemberDetails),
-              let name = familyMemberData["name"] as? String {
-               nameLabel.text = name
-           } else {
-               nameLabel.text = "Unknown Family Member"
-           }
-           // Load profile image from stored URL
-           if let imageUrl = UserDefaults.standard.string(forKey: Constants.UserDefaultsKeys.familyMemberImageURL) {
-               profileImageView.sd_setImage(with: URL(string: imageUrl), placeholderImage: UIImage(systemName: "person.circle.fill"))
-           }
+        loadUserData();
     }
 
     private func setupNavigationBar() {
@@ -86,7 +76,7 @@ class FamilyProfileViewController: UIViewController, UITableViewDelegate, UITabl
         view.addSubview(profileImageView)
         view.addSubview(nameLabel)
         view.addSubview(tableView)
-        view.addSubview(logoutButton) // Add logout button here
+        view.addSubview(logoutButton)
 
         profileImageView.translatesAutoresizingMaskIntoConstraints = false
         nameLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -125,11 +115,11 @@ class FamilyProfileViewController: UIViewController, UITableViewDelegate, UITabl
     }
 
     func numberOfSections(in tableView: UITableView) -> Int {
-        return 1 // Only one section for the list
+        return 1
     }
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 4 // Patients, About App, Language, Privacy
+        return 4
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -139,8 +129,6 @@ class FamilyProfileViewController: UIViewController, UITableViewDelegate, UITabl
 
         let titles = ["Patients", "About App", "Language", "Privacy"]
         cell.textLabel?.text = titles[indexPath.row]
-
-        // Ensure white background color
         cell.backgroundColor = .white
 
         return cell
@@ -164,13 +152,28 @@ class FamilyProfileViewController: UIViewController, UITableViewDelegate, UITabl
         }
         navigationController?.pushViewController(viewController, animated: true)
     }
-
+    
+    private func loadUserData() {
+        if let familyData = UserDefaults.standard.dictionary(forKey: Constants.UserDefaultsKeys.familyMemberDetails),
+        let name = familyData["name"] as? String {
+            nameLabel.text = name
+        } else {
+            nameLabel.text = "Unknown Family"
+        }
+        if let imageUrl = UserDefaults.standard.string(forKey: Constants.UserDefaultsKeys.familyMemberImageURL),
+            let url = URL(string: imageUrl) {
+                profileImageView.sd_setImage(with: url, placeholderImage: UIImage(systemName: "person.circle.fill"))
+        } else {
+            profileImageView.image = UIImage(systemName: "person.circle.fill")
+        }
+    }
+    
     @objc private func logoutTapped() {
         let familyLoginExtension = FamilyLoginViewController()
         familyLoginExtension.logoutTapped()
     }
 }
 
-#Preview {
+#Preview{
     FamilyProfileViewController()
 }

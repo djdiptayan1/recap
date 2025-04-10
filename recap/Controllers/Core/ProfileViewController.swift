@@ -30,16 +30,7 @@ class ProfileViewController: UIViewController {
 
     private let profileImageView: UIImageView = {
         let imageView = UIImageView()
-        imageView.sd_setImage(
-            with: URL(string: "https://portfoliodata.djdiptayan.in/profile_pics/dj.png"),
-            placeholderImage: UIImage(named: "person.circle"),
-            options: [.retryFailed, .highPriority],
-            completed: { _, error, _, _ in
-                if error != nil {
-                    imageView.image = UIImage(named: "person.circle")
-                }
-            }
-        )
+        imageView.image = UIImage(systemName: "person.circle")
         imageView.contentMode = .scaleAspectFill
         imageView.layer.cornerRadius = 10
         imageView.clipsToBounds = true

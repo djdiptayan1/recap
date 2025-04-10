@@ -15,7 +15,7 @@ class StreakCardView: UIView {
         let label = UILabel()
         label.text = "Daily Checker 🧠"
         label.font = Constants.FontandColors.titleFont
-        label.textColor = Constants.FontandColors.titleColor
+        label.textColor = AppColors.primaryTextColor
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()

@@ -9,7 +9,7 @@ import UIKit
 
 extension StreaksViewController {
     
-    // MARK: - Setup Gradient Background
+   // Gradient Background
     func setupGradientBackground() {
         let gradientLayer = CAGradientLayer()
         gradientLayer.colors = [
@@ -43,46 +43,6 @@ extension StreaksViewController {
     func setupNavBar() {
         title = "Daily Checker"
     }
-    
-    // MARK: - Setup Streak Stats View
-//    func setupStreakStatsView() {
-//        streakStatsView.backgroundColor = .white
-//        streakStatsView.layer.cornerRadius = 12
-//        streakStatsView.layer.shadowColor = UIColor.black.cgColor
-//        streakStatsView.layer.shadowOpacity = 0.1
-//        streakStatsView.layer.shadowOffset = CGSize(width: 0, height: 2)
-//        streakStatsView.layer.shadowRadius = 4
-//        streakStatsView.translatesAutoresizingMaskIntoConstraints = false
-//        view.addSubview(streakStatsView)
-//
-//        let streakStatsStackView = UIStackView()
-//        streakStatsStackView.axis = .horizontal
-//        streakStatsStackView.distribution = .fillEqually
-//        streakStatsStackView.alignment = .center
-//        streakStatsStackView.translatesAutoresizingMaskIntoConstraints = false
-//
-//        let maxStreakView = createStatView(title: "Max Streak", value: "0")
-//        let currentStreakView = createStatView(title: "Current Streak", value: "0")
-//        let activeDaysView = createStatView(title: "Active Days", value: "0")
-//
-//        streakStatsStackView.addArrangedSubview(maxStreakView)
-//        streakStatsStackView.addArrangedSubview(currentStreakView)
-//        streakStatsStackView.addArrangedSubview(activeDaysView)
-//
-//        streakStatsView.addSubview(streakStatsStackView)
-//
-//        NSLayoutConstraint.activate([
-//            streakStatsView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
-//            streakStatsView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-//            streakStatsView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-//            streakStatsView.heightAnchor.constraint(equalToConstant: 80),  // Decreased height
-//
-//            streakStatsStackView.leadingAnchor.constraint(equalTo: streakStatsView.leadingAnchor, constant: 16),
-//            streakStatsStackView.trailingAnchor.constraint(equalTo: streakStatsView.trailingAnchor, constant: -16),
-//            streakStatsStackView.topAnchor.constraint(equalTo: streakStatsView.topAnchor, constant: 16),
-//            streakStatsStackView.bottomAnchor.constraint(equalTo: streakStatsView.bottomAnchor, constant: -16)
-//        ])
-//    }
     
     // Method to update the streak stats on the UI
     func updateStreakStats(maxStreak: Int, currentStreak: Int, activeDays: Int) {
@@ -352,7 +312,7 @@ extension StreaksViewController {
 
             // Update the streak dates UI
             if let streak = streak {
-                self.updateStreakDatesWithStreaks(streak.streakDates)
+                self.streakDates = streak.streakDates
             } else {
                 print("⚠️ No streak data found for \(currentYearMonth), but not uploading default data.")
             }

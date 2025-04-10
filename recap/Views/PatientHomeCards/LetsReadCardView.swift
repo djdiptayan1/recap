@@ -44,14 +44,14 @@ class LetsReadCardView: UIView {
         
         // Title Label
         titleLabel.text = "Let's Read"
+        titleLabel.textColor = AppColors.primaryTextColor
         titleLabel.font = Constants.FontandColors.titleFont
-        titleLabel.textColor = Constants.FontandColors.titleColor
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         addSubview(titleLabel)
         
         // Arrow Image
         arrowImageView.image = UIImage(systemName: Constants.FontandColors.chevronName)
-        arrowImageView.tintColor = Constants.FontandColors.chevronColor
+        arrowImageView.tintColor = AppColors.secondaryTextColor.withAlphaComponent(0.6)
         arrowImageView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(arrowImageView)
         
@@ -62,27 +62,23 @@ class LetsReadCardView: UIView {
         addSubview(separatorView)
         
         // Description Label
-        descriptionLabel.text = "Reduces memory decline by 30%."
-        descriptionLabel.font = UIFont.systemFont(ofSize: 16, weight: .regular)
-        descriptionLabel.textColor = .systemGray
+        descriptionLabel.text = "Each word you read strengthens your journey. Keep exploring with courage!"
+        descriptionLabel.font = UIFont.systemFont(ofSize: 16)
+        descriptionLabel.textColor = AppColors.secondaryTextColor.withAlphaComponent(0.6)
         descriptionLabel.numberOfLines = 2
         descriptionLabel.translatesAutoresizingMaskIntoConstraints = false
         addSubview(descriptionLabel)
         
         // Constraints
         NSLayoutConstraint.activate([
-            iconImageView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
+            iconImageView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 10),
             iconImageView.centerYAnchor.constraint(equalTo: centerYAnchor),
-            iconImageView.widthAnchor.constraint(equalToConstant: 60),
-            iconImageView.heightAnchor.constraint(equalToConstant: 60),
+            iconImageView.widthAnchor.constraint(equalToConstant: 100),
+            iconImageView.heightAnchor.constraint(equalToConstant: 100),
             
             titleLabel.topAnchor.constraint(equalTo: topAnchor, constant: 24),
-            titleLabel.leadingAnchor.constraint(equalTo: iconImageView.trailingAnchor, constant: Constants
-                .paddingKeys
-                .DefaultPaddingLeft),
-            titleLabel.trailingAnchor.constraint(lessThanOrEqualTo: arrowImageView.leadingAnchor, constant: Constants
-                .paddingKeys
-                .DefaultPaddingRight),
+            titleLabel.leadingAnchor.constraint(equalTo: iconImageView.trailingAnchor, constant: 16),
+            titleLabel.trailingAnchor.constraint(lessThanOrEqualTo: arrowImageView.leadingAnchor, constant: -8),
             
             arrowImageView.centerYAnchor.constraint(equalTo: titleLabel.centerYAnchor),
             arrowImageView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -24),
@@ -90,21 +86,13 @@ class LetsReadCardView: UIView {
             arrowImageView.heightAnchor.constraint(equalToConstant: 22),
             
             separatorView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 12),
-            separatorView.leadingAnchor.constraint(equalTo: iconImageView.trailingAnchor, constant: Constants
-                .paddingKeys
-                .DefaultPaddingLeft),
-            separatorView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: Constants
-                .paddingKeys
-                .DefaultPaddingRight),
+            separatorView.leadingAnchor.constraint(equalTo: titleLabel.leadingAnchor),
+            separatorView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -24),
             separatorView.heightAnchor.constraint(equalToConstant: 1),
             
             descriptionLabel.topAnchor.constraint(equalTo: separatorView.bottomAnchor, constant: 12),
-            descriptionLabel.leadingAnchor.constraint(equalTo: iconImageView.trailingAnchor, constant: Constants
-                .paddingKeys
-                .DefaultPaddingLeft),
-            descriptionLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -Constants
-                .paddingKeys
-                .DefaultPaddingRight),
+            descriptionLabel.leadingAnchor.constraint(equalTo: separatorView.leadingAnchor),
+            descriptionLabel.trailingAnchor.constraint(equalTo: separatorView.trailingAnchor),
             descriptionLabel.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -24)
         ])
     }

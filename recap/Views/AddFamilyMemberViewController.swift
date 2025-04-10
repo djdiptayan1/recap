@@ -2,7 +2,7 @@ import FirebaseAuth
 import PhotosUI
 import UIKit
 
-class AddFamilyMemberViewController: UIViewController, UIImagePickerControllerDelegate & UINavigationControllerDelegate {
+class AddFamilyMemberViewController: UIViewController, UITextFieldDelegate, UIImagePickerControllerDelegate & UINavigationControllerDelegate {
     private var selectedImage: UIImage?
     private var storage: FamilyStorageProtocol
     private let dataUploadManager: DataUploadManager
@@ -206,11 +206,18 @@ class AddFamilyMemberViewController: UIViewController, UIImagePickerControllerDe
         return button
     }()
 
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
         setupGestures()
         setupRelationshipPicker()
+
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
 
         let doneButton = UIBarButtonItem(title: "Cancel", style: .done, target: self, action: #selector(closeButtonTapped))
         navigationItem.rightBarButtonItem = doneButton
@@ -219,8 +226,49 @@ class AddFamilyMemberViewController: UIViewController, UIImagePickerControllerDe
             sheet.prefersEdgeAttachedInCompactHeight = true
         }
 
+        nameTextField.delegate = self
+        relationshipTextField.delegate = self
+        phoneTextField.delegate = self
+        emailTextField.delegate = self
+        passwordTextField.delegate = self
+
         let Dismisskeyboard = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
         view.addGestureRecognizer(Dismisskeyboard)
+    }
+
+    func textFieldDidBeginEditing(_ textField: UITextField) {
+        let contentInsets = UIEdgeInsets(top: 0, left: 0, bottom: 200, right: 0) // adjust bottom inset if needed
+        scrollView.contentInset = contentInsets
+        scrollView.scrollIndicatorInsets = contentInsets
+
+        // Scroll the text field into view
+        var aRect = view.frame
+        aRect.size.height -= 200 // Adjust based on your keyboard height or screen size
+        if !aRect.contains(textField.frame.origin) {
+            let scrollPoint = CGPoint(x: 0, y: textField.frame.origin.y - 20)
+            scrollView.setContentOffset(scrollPoint, animated: true)
+        }
+    }
+
+    @objc func keyboardWillShow(notification: Notification) {
+        // Adjust the scroll view's content insets to account for the keyboard
+        if let userInfo = notification.userInfo,
+           let keyboardFrame = userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect {
+            let keyboardHeight = keyboardFrame.height
+            // Adjust the content inset to move the view above the keyboard
+            UIView.animate(withDuration: 0.3) {
+                self.scrollView.contentInset.bottom = keyboardHeight
+                self.scrollView.scrollIndicatorInsets.bottom = keyboardHeight
+            }
+        }
+    }
+
+    @objc func keyboardWillHide(notification: Notification) {
+        // Reset the content insets when the keyboard disappears
+        UIView.animate(withDuration: 0.3) {
+            self.scrollView.contentInset.bottom = 0
+            self.scrollView.scrollIndicatorInsets.bottom = 0
+        }
     }
 
     @objc func dismissKeyboard() {
@@ -350,7 +398,7 @@ class AddFamilyMemberViewController: UIViewController, UIImagePickerControllerDe
     @objc private func addButtonTapped() {
         do {
             try validateInputs()
-            
+
             // Proceed with adding family member if validation is successful
             guard let name = nameTextField.text,
                   let relationship = relationshipTextField.text,
@@ -361,30 +409,30 @@ class AddFamilyMemberViewController: UIViewController, UIImagePickerControllerDe
                   let patientId = Auth.auth().currentUser?.uid else {
                 return
             }
-            
+
             // Clean phone number
             let cleanPhone = phone.components(separatedBy: CharacterSet.decimalDigits.inverted).joined()
-            
+
             let newMemberId = UUID().uuidString
             let imagePath = "\(patientId)/FAMILY_IMGS/\(newMemberId).jpg"
-            
+
             disableUIForUpload()
-            
+
             FirebaseManager.shared.uploadFamilyMemberImage(patientId: patientId, imagePath: imagePath, image: image) { [weak self] imageURL, error in
                 guard let self = self else { return }
-                
+
                 if let error = error {
                     self.enableUIAfterUpload()
                     self.showAlert(title: "Upload Error", message: "Failed to upload image: \(error.localizedDescription)", retry: true)
                     return
                 }
-                
+
                 guard let imageURL = imageURL else {
                     self.enableUIAfterUpload()
                     self.showAlert(title: "Error", message: "Could not retrieve image URL.", retry: true)
                     return
                 }
-                
+
                 let newMember = FamilyMember(
                     id: newMemberId,
                     name: name,
@@ -395,7 +443,7 @@ class AddFamilyMemberViewController: UIViewController, UIImagePickerControllerDe
                     imageName: newMemberId,
                     imageURL: imageURL
                 )
-                
+
                 self.dataUploadManager.addFamilyMember(for: patientId, member: newMember) { error in
                     DispatchQueue.main.async {
                         self.enableUIAfterUpload()
@@ -443,12 +491,13 @@ class AddFamilyMemberViewController: UIViewController, UIImagePickerControllerDe
             })
         })
     }
+
     private func showAlert(title: String, message: String, retry: Bool = false) {
         let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
-        
+
         let okAction = UIAlertAction(title: retry ? "Retry" : "OK", style: .default, handler: nil)
         alertController.addAction(okAction)
-        
+
         present(alertController, animated: true)
     }
 }

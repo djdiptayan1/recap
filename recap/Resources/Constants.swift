@@ -48,7 +48,7 @@ enum Constants {
         static let DefaultCardCornerRadius = 15.0
     }
     enum ButtonStyle{
-        static let DefaultButtonHeight = 50.0
+        static let DefaultButtonHeight = 56.0
         static let DefaultButtonWidth = 120.0
         static let DefaultButtonCornerRadius = 15.0
         static let DefaultButtonFontSize = 12.0

@@ -353,7 +353,7 @@ class GameCompletionViewController: UIViewController {
         movesLabel.text = "\(moves)"
         
         // Calculate score - adjust formula as needed
-        score = max(1000 - (moves * 10) - (secondsElapsed * 2), 0)
+        score = max(100 - (moves * 1) - (secondsElapsed / 5), 0)
         scoreLabel.text = "\(score)"
         
         // Update description

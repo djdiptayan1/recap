@@ -2,14 +2,13 @@
 //  AboutAppViewController.swift
 //  recap
 //
-//  Created by admin70 on 27/01/25.
+//  Created by khushi on 27/01/25.
 //
 
 import UIKit
 
 class AboutAppViewController: UIViewController {
     
-    // MARK: - UI Components
     private let scrollView: UIScrollView = {
         let scrollView = UIScrollView()
         scrollView.translatesAutoresizingMaskIntoConstraints = false
@@ -22,18 +21,11 @@ class AboutAppViewController: UIViewController {
         contentView.translatesAutoresizingMaskIntoConstraints = false
         return contentView
     }()
-    
-//    private let headerView: UIView = {
-//        let view = UIView()
-//        view.translatesAutoresizingMaskIntoConstraints = false
-//        view.backgroundColor = .systemBlue.withAlphaComponent(0.1)
-//        view.layer.cornerRadius = 16
-//        return view
-//    }()
+
     private let headerView: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
-        view.backgroundColor = .systemBlue.withAlphaComponent(0.1)
+        view.backgroundColor = AppColors.secondaryButtonColor
         view.layer.cornerRadius = 25
         view.layer.maskedCorners = [.layerMaxXMaxYCorner, .layerMinXMaxYCorner]
         return view
@@ -44,18 +36,17 @@ class AboutAppViewController: UIViewController {
         imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.contentMode = .scaleAspectFit
         imageView.image = UIImage(named: "recapLogo")
-        imageView.tintColor = .systemBlue
+        imageView.tintColor = AppColors.secondaryButtonColor
         imageView.layer.cornerRadius = 30
         return imageView
     }()
     
     private let titleLabel: UILabel = {
         let label = UILabel()
-//        label.text = "Recap"
         label.text = LocalizationManager.shared.localizedString(for: "Recap")
         label.font = .systemFont(ofSize: 32, weight: .bold)
         label.textAlignment = .center
-        label.textColor = .systemBlue
+        label.textColor = AppColors.primaryButtonTextColor
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
@@ -68,7 +59,7 @@ class AboutAppViewController: UIViewController {
             label.text = "Version Not Available"
         }
         label.font = .systemFont(ofSize: 14, weight: .medium)
-        label.textColor = .secondaryLabel
+        label.textColor = AppColors.secondaryButtonTextColor.withAlphaComponent(0.7)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
@@ -196,7 +187,7 @@ class AboutAppViewController: UIViewController {
         let iconImage = UIImageView()
         iconImage.translatesAutoresizingMaskIntoConstraints = false
         iconImage.image = UIImage(systemName: icon)
-        iconImage.tintColor = .systemBlue
+        iconImage.tintColor = AppColors.iconColor
         iconImage.contentMode = .scaleAspectFit
         
         let titleLabel = UILabel()

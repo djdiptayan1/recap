@@ -68,6 +68,8 @@ class OnboardingViewController: UIViewController {
         configuration.cornerStyle = .capsule
         configuration.contentInsets = NSDirectionalEdgeInsets(top: 14, leading: 36, bottom: 14, trailing: 36)
         configuration.title = "Get Started"
+        configuration.baseBackgroundColor = AppColors.primaryButtonColor // Change to your desired color
+        configuration.baseForegroundColor = AppColors.primaryButtonTextColor // Change text color if needed
         
         button.configuration = configuration
         return button
@@ -124,7 +126,7 @@ class OnboardingViewController: UIViewController {
         let imageView = UIImageView()
         imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.contentMode = .scaleAspectFit
-        imageView.tintColor = .systemBlue
+        imageView.tintColor = AppColors.iconColor
         imageView.image = UIImage(systemName: feature.image)?.applyingSymbolConfiguration(.init(pointSize: 32))
         
         let textStack = UIStackView()

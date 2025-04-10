@@ -9,17 +9,18 @@ import UIKit
 
 class TabbarViewController: UITabBarController, UITabBarControllerDelegate {
     var analyticsService: CoreAnalyticsService?
+    var verifiedUserDocID: String?
 
     override func viewDidLoad() {
         super.viewDidLoad()
         self.delegate = self
-
+        
         let grayColor = UIColor(white: 0.95, alpha: 0.85)
         
         tabBar.backgroundColor = grayColor
         tabBar.barTintColor = grayColor
         tabBar.isTranslucent = true
-
+        
         // Setup View Controllers
         let tab1 = HomeViewController()
         let tab2 = FamilyViewController_patient()
@@ -48,14 +49,24 @@ class TabbarViewController: UITabBarController, UITabBarControllerDelegate {
         tabBar.tintColor = .label
         setViewControllers([nav1, nav2, nav3], animated: true)
         
-        if let userID = UserDefaults.standard.string(forKey: Constants.UserDefaultsKeys.verifiedUserDocID) {
-                   print("📌 Initializing CoreAnalyticsService with User ID: \(userID)")
-                   analyticsService = CoreAnalyticsService(verifiedUserDocID: userID)
-                   analyticsService?.initializeAnalytics()
-               } else {
-                   print("❌ Error: No verifiedUserDocID found in UserDefaults")
-               }
+        fetchVerifiedUserID() // First, update `verifiedUserDocID`
+        if let userID = verifiedUserDocID {
+            print("📌 Initializing CoreAnalyticsService with User ID: \(userID)")
+            analyticsService = CoreAnalyticsService()
+            analyticsService?.initializeAnalytics()
+        } else {
+            print("❌ Error: No verifiedUserDocID found in UserDefaults")
+        }
+    }
+    
+    private func fetchVerifiedUserID() {
+           verifiedUserDocID = UserDefaults.standard.string(forKey: "verifiedUserDocID")
+           if let userID = verifiedUserDocID {
+               print("✅ Verified User ID: \(userID)")
+           } else {
+               print("❌ Error: No verifiedUserDocID found in UserDefaults")
            }
+       }
     
     func tabBarController(_ tabBarController: UITabBarController, didSelect viewController: UIViewController) {
         let generator = UIImpactFeedbackGenerator(style: .light)

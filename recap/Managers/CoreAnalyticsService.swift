@@ -2,30 +2,33 @@
 //  CoreAnalyticsService.swift
 //  recap
 //
-//  Created by user@47 on 12/02/25.
+//  Created by s1834 on 12/02/25.
 //
 
 import Foundation
 import FirebaseFirestore
 
 class CoreAnalyticsService {
-    
     private let db = Firestore.firestore()
     private var verifiedUserDocID: String
     
-    init(verifiedUserDocID: String) {
-        self.verifiedUserDocID = verifiedUserDocID
-        print("✅ CoreAnalyticsService initialized with User Doc ID: \(verifiedUserDocID)")
+    init?() {
+        guard let docID = UserDefaults.standard.string(forKey: Constants.UserDefaultsKeys.verifiedUserDocID) else {
+            print("❌ Error: verifiedUserDocID not found in UserDefaults.")
+            return nil
+        }
+        self.verifiedUserDocID = docID
     }
     
-    private var analyticsRef: DocumentReference {
+    private lazy var analyticsRef: DocumentReference? = {
+        guard !verifiedUserDocID.isEmpty else { return nil }
         return db.collection("users").document(verifiedUserDocID).collection("core").document("analytics")
-    }
-
-    /// Initializes the analytics document, ensuring the 'core' subcollection exists
+    }()
+    
+    // MARK: - Initialize Analytics
     func initializeAnalytics() {
-        analyticsRef.setData([
-            "lastFetched": Timestamp(date: Date()),
+        let initialData: [String: Any] = [
+            "lastFetched": Timestamp(),
             "lastAnswered": Timestamp(date: Date(timeIntervalSince1970: 0)),
             "appInstalled": true,
             "appOpenedFamily": 0,
@@ -36,36 +39,35 @@ class CoreAnalyticsService {
             "totalTimeSpentPatient": 0.0,
             "averageUsageTimeFamily": 0.0,
             "averageUsageTimePatient": 0.0,
-            "createdAt": Timestamp(date: Date()),
-            "updatedAt": Timestamp(date: Date())
-        ], merge: true) { error in
+            "createdAt": Timestamp(),
+            "updatedAt": Timestamp()
+        ]
+        
+        updateAnalyticsData(initialData, logFailure: "❌ Firestore Analytics Initialization Failed")
+    }
+    
+    // MARK: - Helper Method for Firestore Updates
+    private func updateAnalyticsData(_ data: [String: Any], logFailure: String) {
+        analyticsRef?.setData(data, merge: true) { error in
             if let error = error {
-                print("❌ Firestore Analytics Initialization Failed: \(error.localizedDescription)")
-            } else {
-                print("✅ Firestore Analytics Initialized Successfully")
+                print("\(logFailure): \(error.localizedDescription)")
             }
         }
     }
     
-    /// Tracks the number of times the app has been opened (by family or patient)
+    // MARK: - Track App Open
     func trackAppOpen(isFamily: Bool) {
         let fieldKey = isFamily ? "appOpenedFamily" : "appOpenedPatient"
         
-        analyticsRef.updateData([
+        updateAnalyticsData([
             fieldKey: FieldValue.increment(Int64(1)),
-            "updatedAt": Timestamp(date: Date())
-        ]) { error in
-            if let error = error {
-                print("❌ Firestore Update Failed (App Open): \(error.localizedDescription)")
-            } else {
-                print("✅ Firestore Update Success (App Open) - \(fieldKey)")
-            }
-        }
+            "updatedAt": Timestamp()
+        ], logFailure: "❌ Firestore Update Failed (App Open)")
     }
     
-    /// Tracks the session time spent by family or patient
+    // MARK: - Track Time Spent
     func trackTimeSpent(sessionDuration: Double, isFamily: Bool) {
-        analyticsRef.getDocument { document, error in
+        analyticsRef?.getDocument { document, error in
             if let error = error {
                 print("❌ Firestore Read Failed: \(error.localizedDescription)")
                 return
@@ -84,46 +86,28 @@ class CoreAnalyticsService {
             let totalTimeSpent = (data[totalTimeSpentKey] as? Double ?? 0.0) + sessionDuration
             let averageUsageTime = totalTimeSpent / Double(totalSessions)
 
-            self.analyticsRef.updateData([
+            self.updateAnalyticsData([
                 totalSessionsKey: totalSessions,
                 totalTimeSpentKey: totalTimeSpent,
                 averageUsageTimeKey: averageUsageTime,
-                "updatedAt": Timestamp(date: Date())
-            ]) { error in
-                if let error = error {
-                    print("❌ Error updating time spent: \(error.localizedDescription)")
-                } else {
-                    print("✅ Time spent updated successfully for \(isFamily ? "Family" : "Patient")")
-                }
-            }
+                "updatedAt": Timestamp()
+            ], logFailure: "❌ Error updating time spent")
         }
     }
     
-    /// Tracks the last time a patient answered a question
+    // MARK: - Track Last Answered
     func trackLastAnswered() {
-        analyticsRef.updateData([
-            "lastAnswered": Timestamp(date: Date()),
-            "updatedAt": Timestamp(date: Date())
-        ]) { error in
-            if let error = error {
-                print("❌ Error updating last answered timestamp: \(error.localizedDescription)")
-            } else {
-                print("✅ Last answered timestamp updated.")
-            }
-        }
+        updateAnalyticsData([
+            "lastAnswered": Timestamp(),
+            "updatedAt": Timestamp()
+        ], logFailure: "❌ Error updating last answered timestamp")
     }
     
-    /// Tracks when data was last fetched
+    // MARK: - Track Data Fetched
     func trackDataFetched() {
-        analyticsRef.updateData([
-            "lastFetched": Timestamp(date: Date()),
-            "updatedAt": Timestamp(date: Date())
-        ]) { error in
-            if let error = error {
-                print("❌ Error updating last fetched timestamp: \(error.localizedDescription)")
-            } else {
-                print("✅ Last fetched timestamp updated.")
-            }
-        }
+        updateAnalyticsData([
+            "lastFetched": Timestamp(),
+            "updatedAt": Timestamp()
+        ], logFailure: "❌ Error updating last fetched timestamp")
     }
 }

@@ -59,7 +59,8 @@ class TrendsCardView: UIView {
         
         let titleLabel = UILabel()
         titleLabel.text = "Trends"
-        titleLabel.font = UIFont.systemFont(ofSize: 24, weight: .semibold)
+        titleLabel.textColor = AppColors.primaryTextColor
+        titleLabel.font = Constants.FontandColors.titleFont
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         self.addSubview(titleLabel)
         
@@ -131,8 +132,8 @@ class TrendsCardView: UIView {
     
     private func setupInsightsButton(_ button: UIButton, title: String, tag: Int) {
         button.setTitle(title, for: .normal)
-        button.backgroundColor = UIColor.systemBlue.withAlphaComponent(0.2)
-        button.setTitleColor(.systemBlue, for: .normal)
+        button.backgroundColor = AppColors.primaryButtonColor
+        button.setTitleColor(AppColors.primaryButtonTextColor, for: .normal)
         button.layer.cornerRadius = 12
         button.titleLabel?.font = .systemFont(ofSize: 17, weight: .semibold)
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -173,11 +174,39 @@ class TrendsCardView: UIView {
         
         switch chartType {
         case "donut":
-            if let immediateData = data as? [ImmediateMemoryData], let latest = immediateData.last {
-                let donutChart = DonutChartView(correctAnswers: latest.correctAnswers, incorrectAnswers: latest.incorrectAnswers)
+            if let immediateData = data as? [ImmediateMemoryData] {
+                // Always create a data point for today, even if we need to use 0 values
+                let today = Date()
+                
+                // Try to get today's data if it exists
+                let todayString = { () -> String in
+                    let formatter = DateFormatter()
+                    formatter.dateFormat = "yyyy-MM-dd"
+                    return formatter.string(from: today)
+                }()
+                
+                let todayData = immediateData.first(where: {
+                    let formatter = DateFormatter()
+                    formatter.dateFormat = "yyyy-MM-dd"
+                    return formatter.string(from: $0.date) == todayString
+                })
+                
+                // Use today's data if available, otherwise create empty data for today
+                let dataToDisplay = todayData ?? ImmediateMemoryData(
+                    date: today,
+                    correctAnswers: 0,
+                    incorrectAnswers: 0,
+                    status: .processing
+                )
+                
+                let donutChart = DonutChartView(
+                    correctAnswers: dataToDisplay.correctAnswers,
+                    incorrectAnswers: dataToDisplay.incorrectAnswers
+                )
                 hostingController = UIHostingController(rootView: AnyView(donutChart))
             }
         case "bar":
+            // Rest of your code remains unchanged
             if let recentData = data as? [RecentMemoryData] {
                 let barChart = BarChartView(data: recentData)
                 hostingController = UIHostingController(rootView: AnyView(barChart))

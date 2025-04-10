@@ -2,7 +2,7 @@
 //  DailyQuestionDetailViewController.swift
 //  Recap
 //
-//  Created by user@47 on 15/01/25.
+//  Created by s1834 on 15/01/25.
 //
 
 
@@ -10,12 +10,20 @@ import UIKit
 import FirebaseFirestore
 
 class DailyQuestionDetailViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, QuestionDetailDelegate {
-    var question: Question?
     var verifiedUserDocID: String
     private var manager: QuestionsManager
     private var questions: [Question] = []
     private var lastFetchTime: Date?
     private let fetchInterval: TimeInterval = 86400.0
+    
+    private let tableView: UITableView = {
+        let table = UITableView()
+        table.translatesAutoresizingMaskIntoConstraints = false
+        table.separatorStyle = .none
+        table.rowHeight = UITableView.automaticDimension
+        table.estimatedRowHeight = 120
+        return table
+    }()
 
     init(verifiedUserDocID: String) {
         self.verifiedUserDocID = verifiedUserDocID
@@ -27,64 +35,44 @@ class DailyQuestionDetailViewController: UIViewController, UITableViewDelegate, 
         fatalError("init(coder:) has not been implemented")
     }
     
-    private let captionLabel: UILabel = {
-        let label = UILabel()
-        label.text = "Answer your loved one's daily questions anytime to support their memory journey."
-        label.font = UIFont.systemFont(ofSize: 18)
-        label.textColor = .gray
-        label.numberOfLines = 0
-        label.textAlignment = .left
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
-    }()
-    
-    private let tableView: UITableView = {
-        let table = UITableView()
-        table.translatesAutoresizingMaskIntoConstraints = false
-        table.separatorStyle = .none
-        table.rowHeight = UITableView.automaticDimension
-        table.estimatedRowHeight = 120
-        return table
-    }()
-    
-    // Timer property
     var fetchTimer: Timer?
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        setupUI()
+        loadQuestions()
+        startFetchingQuestions()
+    }
+
+    private func setupUI() {
         view.backgroundColor = .white
         title = "Daily Question"
-        
+            
         navigationItem.rightBarButtonItem = UIBarButtonItem(
             barButtonSystemItem: .add,
             target: self,
             action: #selector(addQuestion)
         )
+        
+        let captionLabel = UILabel()
+        captionLabel.text = "Answer your loved one's daily questions anytime to support their memory journey."
+        captionLabel.font = UIFont.systemFont(ofSize: 18)
+        captionLabel.textColor = .gray
+        captionLabel.numberOfLines = 0
+        captionLabel.translatesAutoresizingMaskIntoConstraints = false
+            
         view.addSubview(captionLabel)
         view.addSubview(tableView)
-        
+            
         tableView.delegate = self
         tableView.dataSource = self
         tableView.register(QuestionCell.self, forCellReuseIdentifier: QuestionCell.identifier)
-        
-        setupConstraints()
-        
-        // Display cached questions if available, else fetch
-        loadQuestions()
-        
-        // Start the 24-hour refresh timer
-        startFetchingQuestions()
-    }
-
-
-
-    
-    private func setupConstraints() {
+            
         NSLayoutConstraint.activate([
             captionLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
             captionLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             captionLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            
+                
             tableView.topAnchor.constraint(equalTo: captionLabel.bottomAnchor, constant: 16),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
@@ -92,195 +80,106 @@ class DailyQuestionDetailViewController: UIViewController, UITableViewDelegate, 
         ])
     }
     
-    // MARK: - Start Timer to Fetch Questions Every 24 Hours
     func startFetchingQuestions() {
-        if fetchTimer == nil { // Ensure only one timer runs
-            // Schedule the timer to call fetchNewQuestions instead of loadQuestions
+        if fetchTimer == nil {
             fetchTimer = Timer.scheduledTimer(timeInterval: fetchInterval, target: self, selector: #selector(fetchNewQuestions), userInfo: nil, repeats: true)
-            // Add timer to run on the main run loop, to ensure it gets triggered properly
             RunLoop.main.add(fetchTimer!, forMode: .common)
         }
     }
 
-    // Fetch New Questions (Always fetch fresh questions, regardless of existing data)
     @objc private func fetchNewQuestions() {
         self.manager.fetchQuestions { [weak self] (fetchedQuestions: [Question]) in
             guard let self = self else { return }
 
             self.questions = fetchedQuestions
-            self.lastFetchTime = Date() // Update fetch timestamp
-            
-            // Update the last fetched timestamp in Firestore
+            self.lastFetchTime = Date()
             let db = Firestore.firestore()
-            let coreRef = db.collection("users")
-                              .document(self.verifiedUserDocID)
-                              .collection("core")
-                              .document("analytics")
+            let coreRef = db.collection("users").document(self.verifiedUserDocID).collection("core").document("analytics")
 
             coreRef.updateData([
                 "lastFetched": self.lastFetchTime ?? Date()
             ]) { error in
                 if let error = error {
-                    print("❌ Error updating lastFetched timestamp: \(error.localizedDescription)")
-                } else {
-                    print("✅ lastFetched timestamp updated successfully.")
+                    print("❌❌ Error updating lastFetched timestamp: \(error.localizedDescription)")
                 }
             }
-
-            self.tableView.reloadData() // Ensure the table view is reloaded
-            print("✅ Questions successfully loaded.")
+            self.tableView.reloadData()
         }
     }
 
-
-    // Load Questions from Firestore (No longer used in the timer selector)
-//    @objc func loadQuestions() {
-//        let currentTime = Date()
-//
-//        // Only proceed if it's been more than the set interval (20 seconds) since the last fetch
-//        if let lastFetch = lastFetchTime, currentTime.timeIntervalSince(lastFetch) < fetchInterval {
-//            print("✅ It's within \(Int(fetchInterval)) seconds. Skipping fetch.")
-//            tableView.reloadData()
-//            return
-//        }
-//
-//        print("🔄 Fetching questions...")
-//
-//        let db = Firestore.firestore()
-//        let userQuestionsRef = db.collection("users").document(verifiedUserDocID).collection("questions")
-//
-//        // Skip collection check and directly fetch new questions on timer-based fetch
-//        userQuestionsRef.getDocuments { [weak self] (snapshot, error) in
-//            guard let self = self else { return }
-//
-//            if let error = error {
-//                print("❌ Firestore error while checking questions collection: \(error.localizedDescription)")
-//                return
-//            }
-//
-//            if let snapshot = snapshot, !snapshot.isEmpty {
-//                print("📌 Found existing questions in Firestore.")
-//                
-//                // Filter questions where correctAnswers is empty
-//                let filteredQuestions = snapshot.documents.compactMap { doc in
-//                    do {
-//                        var question = try doc.data(as: Question.self)
-//                        
-//                        // Check if the question has an empty correctAnswers field
-//                        if question.correctAnswers?.isEmpty ?? true {
-//                            return question
-//                        } else {
-//                            return nil // Ignore questions where correctAnswers is not empty
-//                        }
-//                    } catch {
-//                        print("❌ Error decoding question: \(error)")
-//                        return nil
-//                    }
-//                }
-//
-//                if !filteredQuestions.isEmpty {
-//                    // If questions are found with empty correctAnswers, add to questions array
-//                    self.questions.append(contentsOf: filteredQuestions)
-//                    self.tableView.reloadData()
-//                } else {
-//                    // If no questions with empty correctAnswers, fetch 7 random questions
-//                    print("⚠️ No questions with empty correctAnswers. Fetching 7 random questions.")
-//                    self.fetchRandomQuestions(from: userQuestionsRef)
-//                }
-//            } else {
-//                // If collection is empty or no valid questions are found, fetch fresh questions from the server
-//                print("⚠️ No questions found in Firestore. Fetching new questions...")
-//                self.fetchNewQuestions()
-//            }
-//        }
-//    }
-    
     @objc func loadQuestions() {
         let currentTime = Date()
 
         if let lastFetch = lastFetchTime, currentTime.timeIntervalSince(lastFetch) < fetchInterval {
-            print("✅ It's within \(Int(fetchInterval)) seconds. Skipping fetch.")
             tableView.reloadData()
             return
         }
 
-        print("🔄 Evaluating memory report before fetching questions...")
-
         evaluateAndStoreMemoryReport(for: verifiedUserDocID) { [weak self] in
             guard let self = self else { return }
-            print("🔄 Fetching questions...")
 
-            let db = Firestore.firestore()
-            let userQuestionsRef = db.collection("users").document(verifiedUserDocID).collection("questions")
+            // Move questions to asked before fetching new ones
+            self.manager.moveQuestionsToAskedAndDelete {
+                let db = Firestore.firestore()
+                let userQuestionsRef = db.collection("users").document(self.verifiedUserDocID).collection("questions")
 
-            userQuestionsRef.getDocuments { (snapshot, error) in
-                if let error = error {
-                    print("❌ Firestore error while checking questions collection: \(error.localizedDescription)")
-                    return
-                }
+                userQuestionsRef.getDocuments { (snapshot, error) in
+                    if let error = error {
+                        print("❌ Firestore error while checking questions collection: \(error.localizedDescription)")
+                        return
+                    }
 
-                if let snapshot = snapshot, !snapshot.isEmpty {
-                    print("📌 Found existing questions in Firestore.")
-                    
-                    let filteredQuestions = snapshot.documents.compactMap { doc -> Question? in
-                        do {
-                            var question = try doc.data(as: Question.self)
-                            return question.correctAnswers?.isEmpty ?? true ? question : nil
-                        } catch {
-                            print("❌ Error decoding question: \(error)")
-                            return nil
+                    if let snapshot = snapshot, !snapshot.isEmpty {
+                        let filteredQuestions = snapshot.documents.compactMap { doc -> Question? in
+                            do {
+                                var question = try doc.data(as: Question.self)
+                                return question.correctAnswers?.isEmpty ?? true ? question : nil
+                            } catch {
+                                print("❌ Error decoding question: \(error)")
+                                return nil
+                            }
                         }
-                    }
 
-                    if !filteredQuestions.isEmpty {
-                        self.questions.append(contentsOf: filteredQuestions)
-                        self.tableView.reloadData()
+                        if !filteredQuestions.isEmpty {
+                            self.questions.append(contentsOf: filteredQuestions)
+                            self.tableView.reloadData()
+                        } else {
+                            self.fetchRandomQuestions(from: userQuestionsRef)
+                        }
                     } else {
-                        print("⚠️ No questions with empty correctAnswers. Fetching 7 random questions.")
-                        self.fetchRandomQuestions(from: userQuestionsRef)
+                        self.fetchNewQuestions()
                     }
-                } else {
-                    print("⚠️ No questions found in Firestore. Fetching new questions...")
-                    self.fetchNewQuestions()
                 }
             }
         }
     }
 
 
-    // Fetch 7 Random Questions
     private func fetchRandomQuestions(from collectionRef: CollectionReference) {
-        // Fetch 7 random questions from Firestore
         collectionRef.limit(to: 7).getDocuments { [weak self] (snapshot, error) in
             guard let self = self else { return }
 
             if let error = error {
-                print("❌ Firestore error while fetching random questions: \(error.localizedDescription)")
+                print("❌❌ Firestore error while fetching random questions: \(error.localizedDescription)")
                 return
             }
 
             if let snapshot = snapshot {
-                print("📌 Found \(snapshot.documents.count) random questions in Firestore.")
-
-                // Map the documents to Question objects
                 let randomQuestions = snapshot.documents.compactMap { doc in
                     do {
                         let question = try doc.data(as: Question.self)
                         return question
                     } catch {
-                        print("❌ Error decoding random question: \(error)")
+                        print("❌❌ Error decoding random question: \(error)")
                         return nil
                     }
                 }
-
-                // Append the fetched random questions to the existing ones
                 self.questions.append(contentsOf: randomQuestions)
                 self.tableView.reloadData()
             }
         }
     }
 
-    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return questions.count
     }
@@ -301,7 +200,7 @@ class DailyQuestionDetailViewController: UIViewController, UITableViewDelegate, 
         let selectedQuestion = questions[indexPath.row]
         let questionDetailVC = QuestionDetailViewController(verifiedUserDocID: verifiedUserDocID)
         questionDetailVC.question = selectedQuestion
-        questionDetailVC.delegate = self 
+        questionDetailVC.delegate = self
         navigationController?.pushViewController(questionDetailVC, animated: true)
     }
     
@@ -321,7 +220,6 @@ class DailyQuestionDetailViewController: UIViewController, UITableViewDelegate, 
         present(navController, animated: true, completion: nil)
     }
     
-    // MARK: - Delegate Method to Handle Answer Submission
     func didSubmitAnswer(for question: Question) {
         if let index = questions.firstIndex(where: { $0.id == question.id }) {
             var answeredQuestion = questions.remove(at: index)
@@ -331,7 +229,6 @@ class DailyQuestionDetailViewController: UIViewController, UITableViewDelegate, 
         }
     }
 }
-
-#Preview {
-    DailyQuestionDetailViewController(verifiedUserDocID: "DT7GZI")
+#Preview{
+    DailyQuestionDetailViewController(verifiedUserDocID: "E4McfMAfgATYMSvzx43wm7r1WQ23")
 }

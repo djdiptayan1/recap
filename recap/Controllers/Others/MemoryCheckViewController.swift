@@ -229,6 +229,7 @@ class MemoryCheckViewController: UIViewController {
         formatter.dateFormat = "yyyy-MM-dd"
         return formatter.string(from: Date())
     }
+    
 }
 
 #Preview{

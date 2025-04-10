@@ -29,11 +29,10 @@ class FamilyViewController_patient: UIViewController, UICollectionViewDelegate, 
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        applyGradientBackground()
         // Ensure user is logged in
         guard let currentUser = Auth.auth().currentUser else {
             print("No logged-in user found. Redirecting to login screen.")
-            // Redirect to login if needed
             // navigationController?.pushViewController(LoginViewController(), animated: true)
             return
         }
@@ -44,6 +43,17 @@ class FamilyViewController_patient: UIViewController, UICollectionViewDelegate, 
         setupRealTimeFamilyMemberUpdates()
         setupNotifications()
     }
+    private func applyGradientBackground() {
+            let gradientLayer = CAGradientLayer()
+            gradientLayer.colors = [
+                UIColor(red: 0.69, green: 0.88, blue: 0.88, alpha: 1.0).cgColor,
+                UIColor(red: 0.94, green: 0.74, blue: 0.80, alpha: 1.0).cgColor
+            ]
+            gradientLayer.startPoint = CGPoint(x: 0, y: 0)
+            gradientLayer.endPoint = CGPoint(x: 1, y: 1)
+            gradientLayer.frame = view.bounds
+            view.layer.insertSublayer(gradientLayer, at: 0)
+        }
 
     private func loadFamilyMembersFromCache() {
         familyMembers = dataProtocol.getFamilyMembers()
@@ -63,9 +73,9 @@ class FamilyViewController_patient: UIViewController, UICollectionViewDelegate, 
                 print("Error fetching family members: \(error.localizedDescription)")
             } else if let members = members {
                 self.familyMembers = members
-                self.dataProtocol.saveFamilyMembers(members) // Save updated members locally
+                self.dataProtocol.saveFamilyMembers(members)
                 DispatchQueue.main.async {
-                    self.collectionView.reloadData() // Sync UI
+                    self.collectionView.reloadData()
                 }
             }
         }
@@ -76,7 +86,6 @@ class FamilyViewController_patient: UIViewController, UICollectionViewDelegate, 
             return
         }
 
-        // Set up a real-time listener
         let familyMemberCollection = FirebaseManager.shared.firestore
             .collection(Constants.FirestoreKeys.usersCollection)
             .document(patientId)
@@ -109,7 +118,6 @@ class FamilyViewController_patient: UIViewController, UICollectionViewDelegate, 
                 )
             }
 
-            // Save the updated members in cache
             self.dataProtocol.saveFamilyMembers(self.familyMembers)
 
             DispatchQueue.main.async {
@@ -152,7 +160,6 @@ class FamilyViewController_patient: UIViewController, UICollectionViewDelegate, 
             collectionView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
             collectionView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
         ])
-        GradientBackground()
         setupFloatingButton()
         NotificationCenter.default.addObserver(
             self,
@@ -167,19 +174,6 @@ class FamilyViewController_patient: UIViewController, UICollectionViewDelegate, 
         print("Handling family member added...")
         loadFamilyMembersFromCache()  // Load instantly after adding a family member
         fetchFamilyMembersFromFirestore()  // Sync in background
-    }
-
-    private func GradientBackground() {
-        let gradientLayer = CAGradientLayer()
-        gradientLayer.colors = [
-            UIColor.systemOrange.withAlphaComponent(0.1).cgColor,
-            UIColor.systemBackground.cgColor,
-        ]
-        gradientLayer.startPoint = CGPoint(x: 0, y: 0)
-        gradientLayer.endPoint = CGPoint(x: 0, y: 0.6)
-        gradientLayer.frame = view.bounds
-
-        view.layer.insertSublayer(gradientLayer, at: 0)
     }
 
     private func setupFloatingButton() {
@@ -213,7 +207,6 @@ class FamilyViewController_patient: UIViewController, UICollectionViewDelegate, 
         present(navController, animated: true, completion: nil)
     }
 
-    // MARK: - Collection View Data Source
 
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return familyMembers.count
@@ -255,7 +248,6 @@ class FamilyViewController_patient: UIViewController, UICollectionViewDelegate, 
 
         let memberToDelete = familyMembers[indexPath.row]
 
-        // Show confirmation alert
         let alert = UIAlertController(title: "Delete Family Member", message: "Are you sure you want to delete \(memberToDelete.name)?", preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
         alert.addAction(UIAlertAction(title: "Delete", style: .destructive) { [weak self] _ in
@@ -270,7 +262,6 @@ class FamilyViewController_patient: UIViewController, UICollectionViewDelegate, 
             return
         }
 
-        // Start by deleting the family member from Firebase
         FirebaseManager.shared.deleteFamilyMember(for: patientId, memberId: member.id) { [weak self] error in
             guard let self = self else { return }
             

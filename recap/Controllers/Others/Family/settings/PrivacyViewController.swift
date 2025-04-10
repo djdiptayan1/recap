@@ -25,7 +25,7 @@ class PrivacyViewController: UIViewController {
     private let headerView: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
-        view.backgroundColor = .systemBlue.withAlphaComponent(0.1)
+        view.backgroundColor = AppColors.secondaryButtonColor
         view.layer.cornerRadius = 25
         view.layer.maskedCorners = [.layerMaxXMaxYCorner, .layerMinXMaxYCorner]
         return view
@@ -35,7 +35,7 @@ class PrivacyViewController: UIViewController {
         let imageView = UIImageView()
         imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.contentMode = .scaleAspectFit
-        imageView.tintColor = .systemBlue
+        imageView.tintColor = AppColors.iconColor
         let config = UIImage.SymbolConfiguration(pointSize: 50, weight: .medium)
         imageView.image = UIImage(systemName: "shield.checkerboard", withConfiguration: config)
         return imageView
@@ -44,7 +44,7 @@ class PrivacyViewController: UIViewController {
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.text = "Privacy Policy"
-        label.textColor = .systemBlue
+        label.textColor = AppColors.primaryButtonTextColor
         label.font = .systemFont(ofSize: 32, weight: .bold)
         label.textAlignment = .center
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -54,7 +54,7 @@ class PrivacyViewController: UIViewController {
     private let subtitleLabel: UILabel = {
         let label = UILabel()
         label.text = "Your privacy is our priority"
-        label.textColor = .systemBlue.withAlphaComponent(0.9)
+        label.textColor = AppColors.secondaryButtonTextColor.withAlphaComponent(0.7)
         label.font = .systemFont(ofSize: 16, weight: .medium)
         label.textAlignment = .center
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -191,6 +191,7 @@ class PrivacyViewController: UIViewController {
     }
 }
 
-#Preview {
-    UINavigationController(rootViewController: PrivacyViewController())
+#Preview("Privacy Policy") {
+    let vc = PrivacyViewController()
+    return UINavigationController(rootViewController: vc)
 }

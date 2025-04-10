@@ -6,6 +6,8 @@
 //
 
 import UIKit
+import FirebaseFirestore
+import FirebaseAuth
 
 class launchScreenViewController: UIViewController {
     private let logoImageView: UIImageView = {
@@ -95,21 +97,70 @@ class launchScreenViewController: UIViewController {
                 // Navigate to the family tab bar if family member is logged in
                 let familyTabBarVC = TabbarFamilyViewController()
                 transitionToRootViewController(familyTabBarVC)
-            } else if UserDefaults.standard.bool(forKey: Constants.UserDefaultsKeys.hasPatientCompletedProfile) ||
-                      UserDefaults.standard.bool(forKey: Constants.UserDefaultsKeys.isPatientLoggedIn) {
-                // Navigate to the patient tab bar if patient profile is completed or patient is logged in
-                let patientTabBarVC = TabbarViewController()
-                transitionToRootViewController(patientTabBarVC)
+            } else if UserDefaults.standard.bool(forKey: Constants.UserDefaultsKeys.hasPatientCompletedProfile) {
+                // Check if the user is actually logged in with Firebase
+                if let userId = Auth.auth().currentUser?.uid {
+                    // Verify profile completeness in Firebase
+                    checkProfileCompleteness(userId: userId)
+                } else {
+                    // No Firebase user, go to welcome screen
+                    navigateToWelcomeScreen()
+                }
             } else {
                 // Navigate to the welcome screen if neither condition is met
-                let welcomeVC = WelcomeViewController()
-                let navController = UINavigationController(rootViewController: welcomeVC)
-                navController.modalPresentationStyle = .fullScreen
-                transitionToRootViewController(navController)
+                navigateToWelcomeScreen()
             }
         }
     }
-
+    
+    private func checkProfileCompleteness(userId: String) {
+        let db = Firestore.firestore()
+        
+        db.collection("users").document(userId).getDocument { [weak self] document, error in
+            guard let self = self else { return }
+            
+            if let error = error {
+                print("Error fetching user profile: \(error.localizedDescription)")
+                self.navigateToWelcomeScreen()
+                return
+            }
+            
+            if let document = document, document.exists, let userData = document.data() {
+                // Check if profile is complete by verifying required fields
+                let requiredFields = ["firstName", "lastName", "dateOfBirth", "sex", "bloodGroup", "stage"]
+                let isProfileComplete = requiredFields.allSatisfy { field in
+                    guard let value = userData[field] as? String else { return false }
+                    return !value.isEmpty
+                }
+                
+                if isProfileComplete {
+                    // Profile is complete, navigate to main view
+                    let patientTabBarVC = TabbarViewController()
+                    self.transitionToRootViewController(patientTabBarVC)
+                } else {
+                    // Profile exists but is incomplete, navigate to profile completion
+                    let patientInfoVC = patientInfo()
+                    // Set the delegate to SceneDelegate to handle navigation after profile completion
+                    if let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate {
+                        patientInfoVC.delegate = sceneDelegate
+                    }
+                    let nav = UINavigationController(rootViewController: patientInfoVC)
+                    nav.modalPresentationStyle = .fullScreen
+                    self.transitionToRootViewController(nav)
+                }
+            } else {
+                // No user document, go to welcome screen
+                self.navigateToWelcomeScreen()
+            }
+        }
+    }
+    
+    private func navigateToWelcomeScreen() {
+        let welcomeVC = WelcomeViewController()
+        let navController = UINavigationController(rootViewController: welcomeVC)
+        navController.modalPresentationStyle = .fullScreen
+        transitionToRootViewController(navController)
+    }
 
     private func transitionToRootViewController(_ viewController: UIViewController) {
         guard let window = view.window else { return }

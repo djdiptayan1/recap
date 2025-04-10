@@ -9,9 +9,8 @@ import UIKit
 
 extension StreaksViewController: UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
 
-    // MARK: - UICollectionViewDataSource Methods
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return daysInMonth(year: currentYear, month: currentMonth) // Get the number of days in the current month
+        return daysInMonth(year: currentYear, month: currentMonth)
     }
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -49,7 +48,7 @@ extension StreaksViewController: UICollectionViewDataSource, UICollectionViewDel
         return cell
     }
 
-    // MARK: - Helper Method to Get Number of Days in a Month
+    // Get Number of Days in a Month
     func daysInMonth(year: Int, month: Int) -> Int {
         let calendar = Calendar.current
         let dateComponents = DateComponents(year: year, month: month)

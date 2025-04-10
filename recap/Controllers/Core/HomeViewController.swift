@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import GoogleSignIn
 
 class HomeViewController: UIViewController {
     var analyticsService: CoreAnalyticsService?
@@ -20,8 +21,8 @@ class HomeViewController: UIViewController {
         let label = UILabel()
         label.text = "Activities"
         label.font = .systemFont(ofSize: 24, weight: .bold)
-        label.textAlignment = .left  // Align text to the left
-        label.setContentHuggingPriority(.defaultHigh, for: .horizontal) // Prevent stretching
+        label.textAlignment = .left
+        label.setContentHuggingPriority(.defaultHigh, for: .horizontal)
         return label
     }()
 
@@ -31,12 +32,12 @@ class HomeViewController: UIViewController {
         let config = UIImage.SymbolConfiguration(pointSize: 28, weight: .medium)
         let image = UIImage(systemName: "person.circle.fill", withConfiguration: config)
         button.setImage(image, for: .normal)
-        button.tintColor = .systemGreen
+        button.tintColor = AppColors.iconColor
         button.addTarget(self, action: #selector(profileButtonTapped), for: .touchUpInside)
         return button
         
         if let verifiedUserDocID = UserDefaults.standard.string(forKey: Constants.UserDefaultsKeys.verifiedUserDocID) {
-            analyticsService = CoreAnalyticsService(verifiedUserDocID: Constants.UserDefaultsKeys.verifiedUserDocID)
+            analyticsService = CoreAnalyticsService()
         }
     }()
     
@@ -61,14 +62,14 @@ class HomeViewController: UIViewController {
     }
     override func viewWillAppear(_ animated: Bool) {
             super.viewWillAppear(animated)
-            sessionStartTime = Date()  // Start session tracking
+            sessionStartTime = Date()
         }
 
         override func viewWillDisappear(_ animated: Bool) {
             super.viewWillDisappear(animated)
             
             if let startTime = sessionStartTime {
-                let sessionDuration = Date().timeIntervalSince(startTime) / 60  // Convert to minutes
+                let sessionDuration = Date().timeIntervalSince(startTime) / 60
                 analyticsService?.trackTimeSpent(sessionDuration: sessionDuration, isFamily: false)
             }
         }
@@ -165,7 +166,7 @@ class HomeViewController: UIViewController {
         if let verifiedUserDocID = UserDefaults.standard.string(
             forKey: Constants
                 .UserDefaultsKeys.verifiedUserDocID) {
-            let questionsVC = PatientQuestionsViewController(verifiedUserDocID: verifiedUserDocID)
+            let questionsVC = PatientQuestionViewController(verifiedUserDocID: verifiedUserDocID)
             navigationController?.pushViewController(questionsVC, animated: true)
         } else {
             print("Error: verifiedUserDocID not found in UserDefaults.")

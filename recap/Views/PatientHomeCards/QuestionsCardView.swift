@@ -41,16 +41,16 @@ class QuestionsCardView: UIView {
         iconImageView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(iconImageView)
         
-        titleLabel.text = "Questions"
+        titleLabel.text = "Daily Questions"
+        titleLabel.textColor = AppColors.primaryTextColor
         titleLabel.font = Constants.FontandColors.titleFont
-        titleLabel.textColor = Constants.FontandColors.titleColor
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         addSubview(titleLabel)
         
         arrowImageView.image = UIImage(
             systemName: Constants.FontandColors.chevronName
         )
-        arrowImageView.tintColor = Constants.FontandColors.chevronColor
+        arrowImageView.tintColor = AppColors.secondaryTextColor.withAlphaComponent(0.6)
         arrowImageView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(arrowImageView)
         
@@ -58,51 +58,38 @@ class QuestionsCardView: UIView {
         separatorView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(separatorView)
         
-        descriptionLabel.text = "Boost your memory by up to 20%."
+        descriptionLabel.text = "A little effort each day keeps the memory strong – do it for your family."
         descriptionLabel.font = Constants.FontandColors.descriptionFont
-        descriptionLabel.textColor = Constants.FontandColors.descriptionColor
+        descriptionLabel.textColor = AppColors.secondaryTextColor.withAlphaComponent(0.6)
         descriptionLabel.numberOfLines = 0
         descriptionLabel.translatesAutoresizingMaskIntoConstraints = false
         addSubview(descriptionLabel)
         
         NSLayoutConstraint.activate(
 [
-            iconImageView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
-            iconImageView.centerYAnchor.constraint(equalTo: centerYAnchor),
-            iconImageView.widthAnchor.constraint(equalToConstant: 60),
-            iconImageView.heightAnchor.constraint(equalToConstant: 60),
-            
-            titleLabel.topAnchor.constraint(equalTo: topAnchor, constant: 24),
-            titleLabel.leadingAnchor
-                .constraint(
-                    equalTo: iconImageView.trailingAnchor,
-                    constant: Constants
-                        .paddingKeys
-                        .DefaultPaddingLeft),
-            titleLabel.trailingAnchor.constraint(lessThanOrEqualTo: arrowImageView.leadingAnchor, constant: Constants
-                .paddingKeys
-                .DefaultPaddingRight),
-            
-            arrowImageView.centerYAnchor.constraint(equalTo: titleLabel.centerYAnchor),
-            arrowImageView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -24),
-            arrowImageView.widthAnchor.constraint(equalToConstant: 14),
-            arrowImageView.heightAnchor.constraint(equalToConstant: 22),
-            
-            separatorView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 12),
-            separatorView.leadingAnchor.constraint(equalTo: iconImageView.trailingAnchor, constant: Constants
-                .paddingKeys
-                .DefaultPaddingLeft),
-            separatorView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: Constants
-                .paddingKeys
-                .DefaultPaddingRight),
-            separatorView.heightAnchor.constraint(equalToConstant: 1),
-            
-            descriptionLabel.topAnchor.constraint(equalTo: separatorView.bottomAnchor, constant: 12),
-            descriptionLabel.leadingAnchor.constraint(equalTo: iconImageView.trailingAnchor, constant: Constants
-                .paddingKeys
-                .DefaultPaddingLeft),
-            descriptionLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -8),
-            descriptionLabel.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -24)
+    iconImageView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 10),
+    iconImageView.centerYAnchor.constraint(equalTo: centerYAnchor),
+    iconImageView.widthAnchor.constraint(equalToConstant: 100),
+    iconImageView.heightAnchor.constraint(equalToConstant: 100),
+    
+    titleLabel.topAnchor.constraint(equalTo: topAnchor, constant: 24),
+    titleLabel.leadingAnchor.constraint(equalTo: iconImageView.trailingAnchor, constant: 16),
+    titleLabel.trailingAnchor.constraint(lessThanOrEqualTo: arrowImageView.leadingAnchor, constant: -8),
+    
+    arrowImageView.centerYAnchor.constraint(equalTo: titleLabel.centerYAnchor),
+    arrowImageView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -24),
+    arrowImageView.widthAnchor.constraint(equalToConstant: 14),
+    arrowImageView.heightAnchor.constraint(equalToConstant: 22),
+    
+    separatorView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 12),
+    separatorView.leadingAnchor.constraint(equalTo: titleLabel.leadingAnchor),
+    separatorView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -24),
+    separatorView.heightAnchor.constraint(equalToConstant: 1),
+    
+    descriptionLabel.topAnchor.constraint(equalTo: separatorView.bottomAnchor, constant: 12),
+    descriptionLabel.leadingAnchor.constraint(equalTo: separatorView.leadingAnchor),
+    descriptionLabel.trailingAnchor.constraint(equalTo: separatorView.trailingAnchor),
+    descriptionLabel.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -24)
         ]
 )
     }

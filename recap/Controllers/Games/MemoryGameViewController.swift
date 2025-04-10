@@ -68,10 +68,10 @@ class MemoryGameViewController: UIViewController {
         button.translatesAutoresizingMaskIntoConstraints = false
         button.setTitle("New Game", for: .normal)
         button.titleLabel?.font = Constants.ButtonStyle.DefaultButtonFont
-        button.backgroundColor = Constants.ButtonStyle.DefaultButtonBackgroundColor
+        button.backgroundColor = AppColors.primaryButtonColor
         button
             .setTitleColor(
-                Constants.ButtonStyle.DefaultButtonTextColor,
+                AppColors.primaryButtonTextColor,
                 for: .normal
             )
         button.layer.cornerRadius = Constants.ButtonStyle.DefaultButtonCornerRadius
@@ -124,10 +124,10 @@ class MemoryGameViewController: UIViewController {
         button.translatesAutoresizingMaskIntoConstraints = false
         button.setTitle("Start Game", for: .normal)
         button.titleLabel?.font = Constants.ButtonStyle.DefaultButtonFont
-        button.backgroundColor = Constants.ButtonStyle.DefaultButtonBackgroundColor
+        button.backgroundColor = AppColors.primaryButtonColor
         button
             .setTitleColor(
-                Constants.ButtonStyle.DefaultButtonTextColor,
+                AppColors.primaryButtonTextColor,
                 for: .normal
             )
         button.layer.cornerRadius = Constants.ButtonStyle.DefaultButtonCornerRadius
@@ -244,7 +244,7 @@ class MemoryGameViewController: UIViewController {
         button.contentVerticalAlignment = .fill
         button.contentHorizontalAlignment = .fill
         button.imageEdgeInsets = UIEdgeInsets(top: 20, left: 20, bottom: 20, right: 20)
-        button.tintColor = UIColor(red: 0.2, green: 0.6, blue: 0.9, alpha: 1.0)
+        button.tintColor = AppColors.iconColor.withAlphaComponent(0.7)
 
         button.addTarget(self, action: #selector(cardTapped(_:)), for: .touchUpInside)
 
@@ -549,4 +549,7 @@ class MemoryGameViewController: UIViewController {
         secondsElapsed += 1
         timeLabel.text = "Time: \(secondsElapsed)s"
     }
+}
+#Preview {
+    MemoryGameViewController()
 }
