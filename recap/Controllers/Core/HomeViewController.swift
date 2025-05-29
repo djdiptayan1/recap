@@ -4,7 +4,6 @@
 //
 //  Created by Diptayan Jash on 05/11/24.
 //
-//
 
 import UIKit
 import GoogleSignIn
@@ -26,7 +25,6 @@ class HomeViewController: UIViewController {
         return label
     }()
 
-    
     private lazy var profileButton: UIButton = {
         let button = UIButton(type: .system)
         let config = UIImage.SymbolConfiguration(pointSize: 28, weight: .medium)
@@ -34,11 +32,10 @@ class HomeViewController: UIViewController {
         button.setImage(image, for: .normal)
         button.tintColor = AppColors.iconColor
         button.addTarget(self, action: #selector(profileButtonTapped), for: .touchUpInside)
-        return button
-        
         if let verifiedUserDocID = UserDefaults.standard.string(forKey: Constants.UserDefaultsKeys.verifiedUserDocID) {
             analyticsService = CoreAnalyticsService()
         }
+        return button
     }()
     
     override func viewDidLoad() {
@@ -49,6 +46,7 @@ class HomeViewController: UIViewController {
         setupContent()
         prefetchArticles() // Prefetch articles
     }
+    
     private func prefetchArticles() {
         let dataFetch = DataFetch()
         dataFetch.fetchArticles { [weak self] fetchedArticles, error in
@@ -60,19 +58,20 @@ class HomeViewController: UIViewController {
             }
         }
     }
+    
     override func viewWillAppear(_ animated: Bool) {
-            super.viewWillAppear(animated)
-            sessionStartTime = Date()
-        }
+        super.viewWillAppear(animated)
+        sessionStartTime = Date()
+    }
 
-        override func viewWillDisappear(_ animated: Bool) {
-            super.viewWillDisappear(animated)
-            
-            if let startTime = sessionStartTime {
-                let sessionDuration = Date().timeIntervalSince(startTime) / 60
-                analyticsService?.trackTimeSpent(sessionDuration: sessionDuration, isFamily: false)
-            }
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        
+        if let startTime = sessionStartTime {
+            let sessionDuration = Date().timeIntervalSince(startTime) / 60
+            analyticsService?.trackTimeSpent(sessionDuration: sessionDuration, isFamily: false)
         }
+    }
     
     private func setupNavigationBar() {
         let profileBarButton = UIBarButtonItem(customView: profileButton)
@@ -103,25 +102,17 @@ class HomeViewController: UIViewController {
         contentView.spacing = 16
         contentView.translatesAutoresizingMaskIntoConstraints = false
         
-        NSLayoutConstraint.activate(
-[
+        NSLayoutConstraint.activate([
             contentView.topAnchor.constraint(equalTo: scrollView.topAnchor, constant: 16),
-            contentView.leadingAnchor
-                .constraint(
-                    equalTo: scrollView.leadingAnchor,
-                    constant: Constants
-                        .paddingKeys.DefaultPaddingLeft),
-            contentView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor, constant: Constants
-                .paddingKeys.DefaultPaddingRight),
-            contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor, constant: Constants
-                .paddingKeys.DefaultPaddingBottom),
+            contentView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor, constant: Constants.paddingKeys.DefaultPaddingLeft),
+            contentView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor, constant: Constants.paddingKeys.DefaultPaddingRight),
+            contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor, constant: Constants.paddingKeys.DefaultPaddingBottom),
             contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor, constant: -32)
-        ]
-)
+        ])
     }
     
     private func setupContent() {
-        contentView.spacing = Constants.paddingKeys.DefaultPaddingLeft+8
+        contentView.spacing = Constants.paddingKeys.DefaultPaddingLeft + 8
         let questionsCard = QuestionsCardView()
         let streaksCard = StreakCardView()
         let letsReadCard = LetsReadCardView()
@@ -129,21 +120,12 @@ class HomeViewController: UIViewController {
         [questionsCard, streaksCard].forEach { item in
             item.translatesAutoresizingMaskIntoConstraints = false
             contentView.addArrangedSubview(item)
-            NSLayoutConstraint.activate(
-[
-                item.heightAnchor
-                    .constraint(
-                        equalToConstant: Constants.CardSize.DefaultCardHeight
-                    )
-            ]
-)
+            NSLayoutConstraint.activate([
+                item.heightAnchor.constraint(equalToConstant: Constants.CardSize.DefaultCardHeight)
+            ])
         }
 
-//        contentView.addArrangedSubview(activitiesTitleLabel)
-        
-        [letsReadCard,
-        ]
-            .forEach { item in
+        [letsReadCard].forEach { item in
             item.translatesAutoresizingMaskIntoConstraints = false
             contentView.addArrangedSubview(item)
             NSLayoutConstraint.activate([
@@ -163,18 +145,30 @@ class HomeViewController: UIViewController {
     }
     
     @objc private func navigateToQuestions() {
-        if let verifiedUserDocID = UserDefaults.standard.string(
-            forKey: Constants
-                .UserDefaultsKeys.verifiedUserDocID) {
-            let questionsVC = PatientQuestionViewController(verifiedUserDocID: verifiedUserDocID)
-            navigationController?.pushViewController(questionsVC, animated: true)
-        } else {
+        guard let verifiedUserDocID = UserDefaults.standard.string(forKey: Constants.UserDefaultsKeys.verifiedUserDocID) else {
             print("Error: verifiedUserDocID not found in UserDefaults.")
+            return
+        }
+        
+        let dataFetch = DataFetch()
+        dataFetch.fetchFamilyMembers(userId: verifiedUserDocID) { [weak self] familyMembers, error in
+            guard let self = self else { return }
+            DispatchQueue.main.async {
+                if let error = error {
+                    print("Error fetching family members: \(error.localizedDescription)")
+                    self.showAddFamilyMemberAlert()
+                } else if familyMembers?.isEmpty ?? true {
+                    self.showAddFamilyMemberAlert()
+                } else {
+                    let questionsVC = PatientQuestionViewController(verifiedUserDocID: verifiedUserDocID)
+                    self.navigationController?.pushViewController(questionsVC, animated: true)
+                }
+            }
         }
     }
     
     @objc private func navigateToStreaks() {
-        if let verifiedUserDocID = UserDefaults.standard.string(forKey: "verifiedUserDocID") {
+        if let verifiedUserDocID = UserDefaults.standard.string(forKey: Constants.UserDefaultsKeys.verifiedUserDocID) {
             let streaksVC = StreaksViewController(verifiedUserDocID: verifiedUserDocID)
             navigationController?.pushViewController(streaksVC, animated: true)
         } else {
@@ -188,20 +182,33 @@ class HomeViewController: UIViewController {
     }
     
     private func applyGradientBackground() {
-            let gradientLayer = CAGradientLayer()
-            gradientLayer.colors = [
-                UIColor(red: 0.69, green: 0.88, blue: 0.88, alpha: 1.0).cgColor,
-                UIColor(red: 0.94, green: 0.74, blue: 0.80, alpha: 1.0).cgColor
-            ]
-            gradientLayer.startPoint = CGPoint(x: 0, y: 0)
-            gradientLayer.endPoint = CGPoint(x: 1, y: 1)
-            gradientLayer.frame = view.bounds
-            view.layer.insertSublayer(gradientLayer, at: 0)
-        }
+        let gradientLayer = CAGradientLayer()
+        gradientLayer.colors = [
+            UIColor(red: 0.69, green: 0.88, blue: 0.88, alpha: 1.0).cgColor,
+            UIColor(red: 0.94, green: 0.74, blue: 0.80, alpha: 1.0).cgColor
+        ]
+        gradientLayer.startPoint = CGPoint(x: 0, y: 0)
+        gradientLayer.endPoint = CGPoint(x: 1, y: 1)
+        gradientLayer.frame = view.bounds
+        view.layer.insertSublayer(gradientLayer, at: 0)
+    }
+    
+    private func showAddFamilyMemberAlert() {
+        let alert = UIAlertController(
+            title: "Add a Family Member",
+            message: "Please add a family member first to answer your daily questions.",
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: "Add Now", style: .default) { [weak self] _ in
+            guard let self = self else { return }
+            let familyVC = FamilyViewController_patient()
+            self.navigationController?.pushViewController(familyVC, animated: true)
+        })
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+        present(alert, animated: true)
+    }
 }
 
-
-#Preview()
-{
+#Preview {
     HomeViewController()
 }

@@ -16,7 +16,7 @@ class QuestionCell: UITableViewCell {
 
     private let iconContainer: UIView = {
         let view = UIView()
-        view.backgroundColor = .systemGreen.withAlphaComponent(0.1)
+        view.backgroundColor = .white
         view.layer.cornerRadius = Constants.CardSize.DefaultCardCornerRadius
         return view
     }()
@@ -24,7 +24,7 @@ class QuestionCell: UITableViewCell {
     private let iconImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.image = UIImage(systemName: "questionmark.circle.fill")
-        imageView.tintColor = .systemGreen
+        imageView.tintColor = AppColors.primaryButtonColor
         imageView.contentMode = .scaleAspectFit
         return imageView
     }()
@@ -119,9 +119,9 @@ class QuestionCell: UITableViewCell {
         // Debugging: Print isAnswered state
         print("Question: \(question.text), isAnswered: \(question.isAnswered)")
 
-        // Change the color to blue instead of green
+     
         let iconName = question.isAnswered ? "checkmark.circle.fill" : "checkmark.circle"
-        let iconColor = question.isAnswered ? UIColor.systemGreen : UIColor.systemGray  // ✅ Changed to systemBlue
+        let iconColor = question.isAnswered ? AppColors.primaryButtonColor : UIColor.systemGray  // ✅ Changed to systemBlue
 
         DispatchQueue.main.async {
             self.iconImageView.image = UIImage(systemName: iconName)

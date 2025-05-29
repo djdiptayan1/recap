@@ -29,7 +29,7 @@ class StreaksCard: UIView {
     }
     
     private func setupUI() {
-        backgroundColor = .white
+        backgroundColor = AppColors.cardBackgroundColor
         layer.cornerRadius = Constants.CardSize.DefaultCardCornerRadius
         layer.shadowColor = UIColor.black.cgColor
         layer.shadowOpacity = 0.1

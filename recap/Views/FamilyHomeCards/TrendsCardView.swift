@@ -49,7 +49,7 @@ class TrendsCardView: UIView {
     }
     
     private func setupUI() {
-        self.backgroundColor = .white
+        self.backgroundColor = AppColors.cardBackgroundColor
         self.layer.cornerRadius = 12
         self.layer.shadowColor = UIColor.black.cgColor
         self.layer.shadowOpacity = 0.1
@@ -199,7 +199,7 @@ class TrendsCardView: UIView {
                     status: .processing
                 )
                 
-                let donutChart = DonutChartView(
+                let donutChart = ModernDonutChartView(
                     correctAnswers: dataToDisplay.correctAnswers,
                     incorrectAnswers: dataToDisplay.incorrectAnswers
                 )

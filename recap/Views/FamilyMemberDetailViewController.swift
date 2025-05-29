@@ -33,7 +33,9 @@ class FamilyMemberDetailViewController: UIViewController {
     private func setLayout() {
         view.backgroundColor = .systemBackground
         navigationItem.title = member.name
-        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Close", style: .done, target: self, action: #selector(dismissView))
+        let closeButton = UIBarButtonItem(title: "Close", style: .done, target: self, action: #selector(dismissView))
+        closeButton.tintColor = AppColors.iconColor // Change this to your desired color (e.g., .red, .green, or a custom UIColor)
+                navigationItem.rightBarButtonItem = closeButton
         
         // Create scroll view for better accessibility
         scrollView = UIScrollView()
@@ -68,8 +70,8 @@ class FamilyMemberDetailViewController: UIViewController {
 
         let nameLabel = createNameLabel()
         let relationshipLabel = createRelationshipLabel()
-        let phoneStack = createInfoStack(withIcon: "phone.fill", text: member.phone, color: .blue)
-        let emailStack = createInfoStack(withIcon: "envelope.fill", text: "\(member.email)", color: .blue)
+        let phoneStack = createInfoStack(withIcon: "phone.fill", text: member.phone, color: AppColors.iconColor)
+        let emailStack = createInfoStack(withIcon: "envelope.fill", text: "\(member.email)", color:AppColors.iconColor)
 
         let callButton = createCallButton()
         callButton.widthAnchor.constraint(equalToConstant: 250).isActive = true
@@ -129,7 +131,7 @@ class FamilyMemberDetailViewController: UIViewController {
         
         // Add a subtle border to make image stand out
         imageView.layer.borderWidth = 3
-        imageView.layer.borderColor = UIColor.systemBlue.withAlphaComponent(0.3).cgColor
+        imageView.layer.borderColor = AppColors.primaryButtonColor.cgColor
         
         // Add subtle shadow effect
         imageView.layer.shadowColor = UIColor.black.cgColor
@@ -172,7 +174,7 @@ class FamilyMemberDetailViewController: UIViewController {
         let label = UILabel()
         label.text = member.relationship
         label.font = UIFont.systemFont(ofSize: 22, weight: .medium)  // Larger font
-        label.textColor = .systemBlue  // More vibrant color
+        label.textColor = AppColors.iconColor // More vibrant color
         label.textAlignment = .center
         return label
     }
@@ -199,10 +201,10 @@ class FamilyMemberDetailViewController: UIViewController {
         button.setTitle("Call \(member.name)", for: .normal)
         button
             .setTitleColor(
-                Constants.ButtonStyle.DefaultButtonTextColor,
+                AppColors.iconColor,
                 for: .normal
             )
-        button.backgroundColor = Constants.ButtonStyle.DefaultButtonBackgroundColor
+        button.backgroundColor = AppColors.primaryButtonColor
         button.layer.cornerRadius = Constants.ButtonStyle.DefaultButtonCornerRadius
         button.titleLabel?.font = Constants.ButtonStyle.DefaultButtonFont
         button.contentEdgeInsets = UIEdgeInsets(top: 16, left: 32, bottom: 16, right: 32)

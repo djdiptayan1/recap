@@ -438,7 +438,7 @@ class MemoryGameViewController: UIViewController {
         UIView.transition(with: card, duration: animationDuration, options: .transitionFlipFromRight, animations: {
             // Show the card back
             card.setImage(UIImage(systemName: "questionmark.circle.fill"), for: .normal)
-            card.tintColor = UIColor(red: 0.2, green: 0.6, blue: 0.9, alpha: 1.0)
+            card.tintColor = AppColors.iconColor.withAlphaComponent(0.7)
             card.backgroundColor = .white
         }, completion: nil)
 

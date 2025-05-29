@@ -6,16 +6,11 @@
 //
 
 import AuthenticationServices
-import CryptoKit
-import FirebaseAuth
 import GoogleSignIn
 import UIKit
-import FirebaseFirestore
-import Lottie
 
-class PatientLoginViewController: UIViewController, ASAuthorizationControllerDelegate, ASAuthorizationControllerPresentationContextProviding {
+class PatientLoginViewController: UIViewController {
     var isRemembered = true
-    var currentNonce: String?
 
     // MARK: - UI Components
 
@@ -119,8 +114,8 @@ class PatientLoginViewController: UIViewController, ASAuthorizationControllerDel
     fileprivate let loginButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Log in", for: .normal)
-        button.backgroundColor = .systemBlue.withAlphaComponent(0.2)
-        button.setTitleColor(.systemBlue, for: .normal)
+        button.backgroundColor = AppColors.primaryButtonColor
+        button.setTitleColor(AppColors.primaryButtonTextColor, for: .normal)
         button.layer.cornerRadius = Constants.CardSize.DefaultCardCornerRadius
         button.titleLabel?.font = .systemFont(ofSize: 17, weight: .semibold)
         return button
@@ -128,8 +123,8 @@ class PatientLoginViewController: UIViewController, ASAuthorizationControllerDel
 
     private let dividerLabel: UILabel = {
         let label = UILabel()
-        label.text = "Sign in with"
-        label.textColor = .systemGray
+        label.text = "or"
+        label.textColor = AppColors.primaryTextColor
         label.textAlignment = .center
         label.font = .systemFont(ofSize: 14)
         return label
@@ -144,82 +139,40 @@ class PatientLoginViewController: UIViewController, ASAuthorizationControllerDel
     }()
 
     fileprivate let googleButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.backgroundColor = .white
-        button.layer.cornerRadius = Constants.CardSize.DefaultCardCornerRadius
+        var config = UIButton.Configuration.filled()
+        config.baseBackgroundColor = .white
+        config.baseForegroundColor = .black
+        config.title = "Sign in with Google"
+        config.image = UIImage(named: "googleLogo")?.resized(to: CGSize(width: 24, height: 24))
+        config.imagePadding = 16
+        config.imagePlacement = .leading
+        config.cornerStyle = .medium
+
+        let button = UIButton(configuration: config)
         button.layer.borderWidth = 1
         button.layer.borderColor = UIColor.systemGray4.cgColor
-        button.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
-
-        // Google Logo
-        let imageView = UIImageView(image: UIImage(named: "googleLogo"))
-        imageView.contentMode = .scaleAspectFit
-        imageView.translatesAutoresizingMaskIntoConstraints = false
-        imageView.widthAnchor.constraint(equalToConstant: 24).isActive = true
-        imageView.heightAnchor.constraint(equalToConstant: 24).isActive = true
-
-        // Label
-        let label = UILabel()
-        label.text = "Sign in with Google"
-        label.font = .systemFont(ofSize: 16, weight: .medium)
-        label.textColor = .black
-
-        // StackView for image + text
-        let stackView = UIStackView(arrangedSubviews: [imageView, label])
-        stackView.axis = .horizontal
-        stackView.spacing = 8
-        stackView.alignment = .center
-        stackView.translatesAutoresizingMaskIntoConstraints = false
-        stackView.isUserInteractionEnabled = false // Disable user interaction on the stack view
-
-        button.addSubview(stackView)
-
-        NSLayoutConstraint.activate([
-            stackView.centerXAnchor.constraint(equalTo: button.centerXAnchor),
-            stackView.centerYAnchor.constraint(equalTo: button.centerYAnchor)
-        ])
-
+        button.layer.cornerRadius = 10
+        button.clipsToBounds = true
         return button
     }()
 
-    // Apple Sign In Button - Custom implementation with border
     fileprivate let appleButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.backgroundColor = .black
-        button.layer.cornerRadius = Constants.CardSize.DefaultCardCornerRadius
-        button.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
+        var config = UIButton.Configuration.filled()
+        config.baseBackgroundColor = .black
+        config.baseForegroundColor = .white
+        config.title = "Sign in with Apple"
 
-        // Apple Logo
-        let imageView = UIImageView(image: UIImage(systemName: "applelogo"))
-        imageView.tintColor = .white
-        imageView.contentMode = .scaleAspectFit
-        imageView.translatesAutoresizingMaskIntoConstraints = false
-        imageView.widthAnchor.constraint(equalToConstant: 24).isActive = true
-        imageView.heightAnchor.constraint(equalToConstant: 24).isActive = true
+        config.image = UIImage(named: "AppleIcon")?.resized(to: CGSize(width: 24, height: 24))
+        config.imagePadding = 16
+        config.imagePlacement = .leading
+        config.cornerStyle = .medium
 
-        // Label
-        let label = UILabel()
-        label.text = "Sign in with Apple"
-        label.font = .systemFont(ofSize: 16, weight: .medium)
-        label.textColor = .white
-
-        // StackView for image + text
-        let stackView = UIStackView(arrangedSubviews: [imageView, label])
-        stackView.axis = .horizontal
-        stackView.spacing = 8
-        stackView.alignment = .center
-        stackView.translatesAutoresizingMaskIntoConstraints = false
-        stackView.isUserInteractionEnabled = false // Disable user interaction on the stack view
-
-        button.addSubview(stackView)
-
-        NSLayoutConstraint.activate([
-            stackView.centerXAnchor.constraint(equalTo: button.centerXAnchor),
-            stackView.centerYAnchor.constraint(equalTo: button.centerYAnchor)
-        ])
-
+        let button = UIButton(configuration: config)
+        button.layer.cornerRadius = 10
+        button.clipsToBounds = true
         return button
     }()
+
 
 
     private let signupButton: UIButton = {
@@ -249,134 +202,6 @@ class PatientLoginViewController: UIViewController, ASAuthorizationControllerDel
 
     @objc func dismissKeyboard() {
         view.endEditing(true)
-    }
-
-    // MARK: - ASAuthorizationControllerPresentationContextProviding
-    func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
-        return view.window!
-    }
-
-    // MARK: - User Profile Management
-    
-    private func fetchOrCreateUserProfile(userId: String, email: String, loadingAnimation: LottieAnimationView) {
-        let db = Firestore.firestore()
-
-        db.collection("users").document(userId).getDocument { [weak self] document, error in
-            guard let self = self else { return }
-
-            if let error = error {
-                self.removeLoadingAnimation(loadingAnimation)
-                print("Error fetching user profile: \(error.localizedDescription)")
-                self.showAlert(message: "Failed to fetch user profile.")
-                return
-            }
-
-            if let document = document, document.exists {
-                // Existing user profile found
-                let userData = document.data() ?? [:]
-                
-                // Check if profile is complete by verifying required fields
-                let requiredFields = ["firstName", "lastName", "dateOfBirth", "sex", "bloodGroup", "stage"]
-                let isProfileComplete = requiredFields.allSatisfy { field in
-                    guard let value = userData[field] as? String else { return false }
-                    return !value.isEmpty
-                }
-                
-                if isProfileComplete {
-                    // Profile is complete, navigate to main view
-                    print("User profile is complete, navigating to main view")
-                    UserDefaults.standard.set(true, forKey: Constants.UserDefaultsKeys.isPatientLoggedIn)
-                    UserDefaults.standard.set(true, forKey: Constants.UserDefaultsKeys.hasPatientCompletedProfile)
-                    UserDefaults.standard.synchronize()
-                    
-                    self.removeLoadingAnimation(loadingAnimation)
-                    let tabBarVC = TabbarViewController()
-                    self.navigationController?.setViewControllers([tabBarVC], animated: true)
-                } else {
-                    // Profile exists but is incomplete, navigate to profile completion
-                    print("User profile is incomplete, navigating to profile completion")
-                    self.removeLoadingAnimation(loadingAnimation)
-                    let patientInfoVC = patientInfo()
-                    // Set the delegate to SceneDelegate to handle navigation after profile completion
-                    if let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate {
-                        patientInfoVC.delegate = sceneDelegate
-                    }
-                    let nav = UINavigationController(rootViewController: patientInfoVC)
-                    nav.modalPresentationStyle = .pageSheet  // Change from .fullScreen to .pageSheet
-                    self.present(nav, animated: true)
-                }
-            } else {
-                // New user, generate unique patient ID and save profile
-                self.generateUniquePatientID { patientUID in
-                    guard let patientUID = patientUID else {
-                        self.removeLoadingAnimation(loadingAnimation)
-                        print("Failed to generate unique Patient ID.")
-                        self.showAlert(message: "Unable to create profile. Please try again.")
-                        return
-                    }
-
-                    // Initial data structure
-                    let initialData: [String: Any] = [
-                        "email": email,
-                        "patientUID": patientUID,
-                        "firstName": "",
-                        "lastName": "",
-                        "dateOfBirth": "",
-                        "sex": "",
-                        "bloodGroup": "",
-                        "stage": "",
-                        "profileImageURL": "",
-                        "familyMembers": [],
-                        "type": "patient",
-                    ]
-
-                    // Save the initial user profile to Firestore
-                    db.collection("users").document(userId).setData(initialData) { error in
-                        if let error = error {
-                            self.removeLoadingAnimation(loadingAnimation)
-                            print("Error saving initial user profile: \(error.localizedDescription)")
-                            self.showAlert(message: "Failed to create profile. Please try again.")
-                        } else {
-                            print("New user profile created successfully")
-                            self.removeLoadingAnimation(loadingAnimation)
-                            let patientInfoVC = patientInfo()
-                            // Set the delegate to SceneDelegate to handle navigation after profile completion
-                            if let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate {
-                                patientInfoVC.delegate = sceneDelegate
-                            }
-                            let nav = UINavigationController(rootViewController: patientInfoVC)
-                            nav.modalPresentationStyle = .pageSheet  // Change from .fullScreen to .pageSheet
-                            self.present(nav, animated: true)
-                        }
-                    }
-                }
-            }
-        }
-    }
-    
-    private func generateUniquePatientID(completion: @escaping (String?) -> Void) {
-        let db = Firestore.firestore()
-        
-        // Generate a random 6-digit number
-        let randomNum = Int.random(in: 100000...999999)
-        let patientUID = "P\(randomNum)"
-        
-        // Check if this ID already exists
-        db.collection("users").whereField("patientUID", isEqualTo: patientUID).getDocuments { snapshot, error in
-            if let error = error {
-                print("Error checking for existing patient ID: \(error.localizedDescription)")
-                completion(nil)
-                return
-            }
-            
-            if let snapshot = snapshot, snapshot.isEmpty {
-                // ID is unique, return it
-                completion(patientUID)
-            } else {
-                // ID already exists, try again
-                self.generateUniquePatientID(completion: completion)
-            }
-        }
     }
 
     // MARK: - Setup UI
@@ -460,45 +285,17 @@ class PatientLoginViewController: UIViewController, ASAuthorizationControllerDel
         let imageName = passwordField.isSecureTextEntry ? "eye.slash" : "eye"
         sender.setImage(UIImage(systemName: imageName), for: .normal)
     }
-    
-    // MARK: - Loading Animation
-    
-    private func showLoadingAnimation() -> LottieAnimationView {
-        let animationView = LottieAnimationView(name: "LoadingAnimation")
-        animationView.contentMode = .scaleAspectFit
-        animationView.loopMode = .loop
-        animationView.translatesAutoresizingMaskIntoConstraints = false
-        
-        view.addSubview(animationView)
-        
-        NSLayoutConstraint.activate([
-            animationView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            animationView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-            animationView.widthAnchor.constraint(equalToConstant: 100),
-            animationView.heightAnchor.constraint(equalToConstant: 100)
-        ])
-        
-        animationView.play()
-        return animationView
-    }
-    
-    // MARK: - Alert
-    
-    private func showAlert(message: String) {
-        let alert = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "OK", style: .default))
-        present(alert, animated: true)
-    }
-    
-    // MARK: - Validation
-    
-    private func isValidEmail(_ email: String) -> Bool {
-        let emailRegEx = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}"
-        let emailPred = NSPredicate(format:"SELF MATCHES %@", emailRegEx)
-        return emailPred.evaluate(with: email)
-    }
 }
 
 #Preview{
     PatientLoginViewController()
+}
+
+extension UIImage {
+    func resized(to size: CGSize) -> UIImage? {
+        let renderer = UIGraphicsImageRenderer(size: size)
+        return renderer.image { _ in
+            self.draw(in: CGRect(origin: .zero, size: size))
+        }
+    }
 }

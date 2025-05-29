@@ -39,7 +39,7 @@ class FamilyProfileViewController: UIViewController, UITableViewDelegate, UITabl
         let button = UIButton(type: .system)
         button.setTitle("Logout", for: .normal)
         button.titleLabel?.font = .boldSystemFont(ofSize: 17)
-        button.backgroundColor = .systemRed
+        button.backgroundColor = AppColors.iconColor
         button.setTitleColor(.white, for: .normal)
         button.layer.cornerRadius = Constants.CardSize.DefaultCardCornerRadius
         button.clipsToBounds = true
@@ -66,6 +66,7 @@ class FamilyProfileViewController: UIViewController, UITableViewDelegate, UITabl
             action: #selector(doneButtonTapped)
         )
         navigationItem.rightBarButtonItem = doneButton
+        doneButton.tintColor = AppColors.iconColor
     }
 
     @objc private func doneButtonTapped() {
@@ -160,11 +161,15 @@ class FamilyProfileViewController: UIViewController, UITableViewDelegate, UITabl
         } else {
             nameLabel.text = "Unknown Family"
         }
+        
+        let placeholderImage = UIImage(systemName: "person.circle.fill")?
+            .withTintColor(AppColors.iconColor, renderingMode: .alwaysOriginal)
+
         if let imageUrl = UserDefaults.standard.string(forKey: Constants.UserDefaultsKeys.familyMemberImageURL),
             let url = URL(string: imageUrl) {
-                profileImageView.sd_setImage(with: url, placeholderImage: UIImage(systemName: "person.circle.fill"))
+            profileImageView.sd_setImage(with: url, placeholderImage: placeholderImage)
         } else {
-            profileImageView.image = UIImage(systemName: "person.circle.fill")
+            profileImageView.image = placeholderImage
         }
     }
     

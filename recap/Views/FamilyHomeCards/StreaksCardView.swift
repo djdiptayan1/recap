@@ -69,7 +69,7 @@ class StreakCardView: UIView {
     }
     
     private func setupUI() {
-        backgroundColor = .white
+        backgroundColor = AppColors.cardBackgroundColor
         layer.cornerRadius = Constants.CardSize.DefaultCardCornerRadius
         layer.shadowColor = UIColor.systemOrange.cgColor
         layer.shadowOpacity = Float(
@@ -124,8 +124,8 @@ class StreakCardView: UIView {
 
         let valueLabel = UILabel()
         valueLabel.text = value
-        valueLabel.font = UIFont.systemFont(ofSize: 25, weight: .bold)
-        valueLabel.textColor = .systemOrange
+        valueLabel.font = UIFont.systemFont(ofSize: 30, weight: .bold)
+        valueLabel.textColor = AppColors.iconColor
 
         let titleLabel = UILabel()
         titleLabel.text = title

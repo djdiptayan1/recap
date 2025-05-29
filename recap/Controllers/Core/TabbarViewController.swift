@@ -46,7 +46,7 @@ class TabbarViewController: UITabBarController, UITabBarControllerDelegate {
         nav2.navigationBar.prefersLargeTitles = true
         nav3.navigationBar.prefersLargeTitles = true
         
-        tabBar.tintColor = .label
+        tabBar.tintColor = AppColors.iconColor
         setViewControllers([nav1, nav2, nav3], animated: true)
         
         fetchVerifiedUserID() // First, update `verifiedUserDocID`

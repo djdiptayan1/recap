@@ -59,6 +59,7 @@ class FamilyViewController: UIViewController {
         navigationItem.rightBarButtonItem = profileBarButton
         navigationController?.navigationBar.prefersLargeTitles = true
         title = "Family"
+        profileBarButton.tintColor = AppColors.iconColor
     }
 
     private func setupUI() {

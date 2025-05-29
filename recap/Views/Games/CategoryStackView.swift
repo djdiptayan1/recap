@@ -13,8 +13,8 @@ class CategoryStackView: UIStackView {
         view.backgroundColor = .systemBackground
         view.layer.cornerRadius = Constants.CardSize.DefaultCardCornerRadius
         view.layer.borderWidth = 2
-        view.layer.borderColor = UIColor.systemIndigo.withAlphaComponent(0.3).cgColor
-        view.layer.shadowColor = Constants.FontandColors.defaultshadowColor
+        view.layer.borderColor = AppColors.primaryButtonColor.cgColor
+        view.layer.shadowColor = AppColors.inverseTextColor.cgColor
         view.layer.shadowOpacity = Float(Constants.FontandColors.defaultshadowOpacity)
         view.layer.shadowOffset = Constants.FontandColors.defaultshadowOffset
         view.layer.shadowRadius = Constants.FontandColors.defaultshadowRadius
@@ -25,7 +25,7 @@ class CategoryStackView: UIStackView {
         let label = UILabel()
         label.font = .systemFont(ofSize: 18, weight: .bold)
         label.textAlignment = .center
-        label.textColor = .systemIndigo
+        label.textColor = AppColors.primaryButtonTextColor
         return label
     }()
     

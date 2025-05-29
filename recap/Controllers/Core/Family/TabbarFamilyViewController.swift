@@ -28,6 +28,9 @@ class TabbarFamilyViewController: UITabBarController, UITabBarControllerDelegate
         nav1.navigationBar.prefersLargeTitles = true
         nav2.navigationBar.prefersLargeTitles = true
         
+        tabBar.tintColor = AppColors.iconColor // Set selected tab color to systemBlue (or your desired color)
+                tabBar.unselectedItemTintColor = .gray
+        
         setViewControllers([nav1, nav2], animated: true)
         
         analyticsService!.initializeAnalytics()

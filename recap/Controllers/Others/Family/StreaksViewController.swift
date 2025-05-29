@@ -11,7 +11,7 @@ class StreaksViewController: UIViewController {
     let headerView = UIView()
     let streakStatsView = UIView()
     let calendarView = UIView()
-    let calendarCollectionView: UICollectionView!
+    var calendarCollectionView: UICollectionView!
     let monthYearLabel = UILabel()
     let previousMonthButton = UIButton()
     let nextMonthButton = UIButton()
@@ -26,6 +26,11 @@ class StreaksViewController: UIViewController {
 
     private var verifiedUserDocID: String
     var streakService: StreakService!
+    
+    private var infoCard: UIView?
+    private var blurredView: UIVisualEffectView?
+    private var isInfoCardVisible = false
+    
     
     init(verifiedUserDocID: String) {
         self.verifiedUserDocID = verifiedUserDocID
